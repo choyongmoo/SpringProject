@@ -38,9 +38,13 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public Comment updateComment(Long id, CommentRequest request) {
+    public Comment updateComment(Long id, CommentRequest request, Long userId) {
         Comment comment = commentRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Comment not found"));
+        
+        if (!comment.getAuthor().getId().equals(userId)) {
+            throw new RuntimeException("You are not the author of this comment");
+        }
         
         comment.setContent(request.getContent());
         return commentRepository.save(comment);
@@ -52,5 +56,11 @@ public class CommentService {
 
     public void deleteComment(Long id) {
         commentRepository.deleteById(id);
+    }
+
+    public boolean isAuthor(Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new RuntimeException("Comment not found"));
+        return comment.getAuthor().getId().equals(userId);
     }
 }

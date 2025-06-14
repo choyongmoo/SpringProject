@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import ac.yuhan.backend.domain.comment.CommentService;
 import ac.yuhan.backend.domain.comment.dto.CommentRequest;
 import ac.yuhan.backend.domain.comment.dto.CommentResponse;
+import ac.yuhan.backend.security.CustomUserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/api/comments")
@@ -46,9 +48,15 @@ public class CommentController {
 
     // 댓글 수정
     @PutMapping("/{id}")
-    public ResponseEntity<CommentResponse> update(@PathVariable Long id, @RequestBody CommentRequest request) {
+    public ResponseEntity<CommentResponse> update(
+            @PathVariable Long id,
+            @RequestBody CommentRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        
+        Long userId = userDetails.getUserId();
+
         return ResponseEntity.ok(
-            new CommentResponse(commentService.updateComment(id, request))
+            new CommentResponse(commentService.updateComment(id, request, userId))
         );
     }
 }

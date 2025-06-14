@@ -7,22 +7,32 @@ import org.springframework.stereotype.Service;
 
 import ac.yuhan.backend.domain.category.Category;
 import ac.yuhan.backend.domain.category.CategoryRepository;
+import ac.yuhan.backend.domain.user.User;
+import ac.yuhan.backend.domain.user.UserRepository;
 
 @Service
 public class PostService {
 
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
-    public PostService(PostRepository postRepository, CategoryRepository categoryRepository) {
+    public PostService(PostRepository postRepository, CategoryRepository categoryRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
     }
 
-    public Post createPost(Post post, Long categoryId) {
+    public Post createPost(Post post, Long categoryId, Long authorId) {
         Category category = categoryRepository.findById(categoryId)
             .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        User author = userRepository.findById(authorId)
+            .orElseThrow(() -> new RuntimeException("Author not found"));
+
         post.setCategory(category);
+        post.setAuthor(author);
+
         return postRepository.save(post);
     }
 

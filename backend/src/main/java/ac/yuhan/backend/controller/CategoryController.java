@@ -21,6 +21,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    //카테고리 생성
     @PostMapping
     public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryRequest request) {
         Category category = new Category();
@@ -30,6 +31,7 @@ public class CategoryController {
         return ResponseEntity.ok(toResponse(created));
     }
 
+    //모든 카테고리 목록 조회
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> getAllCategories() {
         List<CategoryResponse> responses = categoryService.getAllCategories()
@@ -39,6 +41,7 @@ public class CategoryController {
         return ResponseEntity.ok(responses);
     }
 
+    //특정 id의 카테고리 상세 조회
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
         return categoryService.getCategoryById(id)
@@ -47,6 +50,7 @@ public class CategoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    //특정 id의 카테고리 수정
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponse> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
         Category updatedCategory = new Category();
@@ -61,6 +65,7 @@ public class CategoryController {
         }
     }
 
+    //특정 id의 카테고리 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
