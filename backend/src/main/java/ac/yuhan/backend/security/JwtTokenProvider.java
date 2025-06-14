@@ -15,11 +15,13 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
+import org.springframework.beans.factory.annotation.Value;
 
 @Component
 public class JwtTokenProvider {
 
-    private String secretKey = "verylongandsecuresecretkeythatshouldbeusedforjwt";
+    @Value("${jwt.secret}")
+    private String secretKey;
 
     @PostConstruct
     protected void init() {
