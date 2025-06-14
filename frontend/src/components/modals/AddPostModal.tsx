@@ -8,9 +8,10 @@ interface AddPostModalProps {
   onClose: () => void;
   categoryId: number;
   categoryName: string;
+  isOpen: boolean;
 }
 
-export default function AddPostModal({ onClose, categoryId, categoryName }: AddPostModalProps) {
+export default function AddPostModal({ onClose, categoryId, categoryName, isOpen }: AddPostModalProps) {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -24,7 +25,7 @@ export default function AddPostModal({ onClose, categoryId, categoryName }: AddP
   };
 
   return (
-    <ModalLayout title={`Add Post to ${categoryName}`} onClose={onClose}>
+    <ModalLayout title={`Add Post to ${categoryName}`} onClose={onClose} isOpen={isOpen}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormInput
           id="title"
