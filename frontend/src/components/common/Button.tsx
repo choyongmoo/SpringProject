@@ -1,46 +1,38 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger';
-type ButtonSize = 'sm' | 'md' | 'lg';
+type Variant = "primary" | "secondary" | "outline" | "danger";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: ButtonVariant;
-  size?: ButtonSize;
+  variant: Variant;
   fullWidth?: boolean;
   className?: string;
 }
 
-const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-green-600 hover:bg-green-700 text-white',
-  secondary: 'bg-gray-800 hover:bg-gray-700 text-white',
-  outline: 'border border-green-600 text-green-400 hover:bg-green-600 hover:text-white',
-  danger: 'bg-red-600 hover:bg-red-700 text-white',
-};
+const baseStyle = 'py-2 px-4 rounded-lg transition-colors';
 
-const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'py-1 px-3 text-sm',
-  md: 'py-2 px-4',
-  lg: 'py-3 px-6 text-lg',
+const variantStyles: Record<Variant, string> = {
+  primary: "bg-primary text-white hover:bg-primary-dark",
+  secondary: "bg-secondary text-white hover:bg-secondary-dark",
+  outline: "bg-transparent border border-primary-light text-primary-light hover:bg-primary-light hover:text-white",
+  danger: "",
 };
 
 export default function Button({
   children,
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
   fullWidth = false,
-  className = '',
+  className = "",
   ...props
 }: ButtonProps) {
-  const baseStyles = 'rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50';
   const widthStyle = fullWidth ? 'w-full' : '';
 
   return (
     <button
-      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${widthStyle} ${className}`}
+      className={`${baseStyle} ${variantStyles[variant]} ${widthStyle} ${className}`}
       {...props}
     >
       {children}
     </button>
-  );
-} 
+  )
+}

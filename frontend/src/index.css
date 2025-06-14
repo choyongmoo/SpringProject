@@ -1,1 +1,26 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: oklch(0.596 0.145 163.225);
+  --color-primary-dark: oklch(0.508 0.118 165.612);
+  --color-primary-light: oklch(0.696 0.17 162.48);
+
+  --color-secondary: oklch(0.551 0.027 264.364);
+  --color-secondary-dark: oklch(0.446 0.03 256.802);
+  --color-secondary-light: oklch(0.707 0.022 261.325);
+
+  --color-background: oklch(0.21 0.034 264.665);
+  --color-background-dark: oklch(0.17 0.028 265.31);
+  --color-background-light: oklch(0.25 0.04 263.97);
+
+  --color-accent: oklch(0.696 0.17 162.48);
+  --color-accent-dark: oklch(0.618 0.152 164.85);
+  --color-accent-light: oklch(0.774 0.188 160.11);
+
+  --color-text: #343a40;
+  --color-border: #dee2e6;
+  --color-success: #28a745;
+  --color-danger: #dc3545;
+  --color-warning: #ffc107;
+  --color-info: #17a2b8;
+}

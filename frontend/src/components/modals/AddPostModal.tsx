@@ -1,65 +1,49 @@
-import { useState } from 'react';
-import ModalLayout from './ModalLayout';
-import FormInput from '../common/FormInput';
-import FormTextarea from '../common/FormTextarea';
-import Button from '../common/Button';
+import { useState } from "react";
+import ModalLayout from "./ModalLayout";
+import Button from "../common/Button";
+import Input from "../common/Input";
 
 interface AddPostModalProps {
-  onClose: () => void;
-  categoryId: number;
-  categoryName: string;
   isOpen: boolean;
+  onClose: () => void;
+  categoryName: string;
 }
 
-export default function AddPostModal({ onClose, categoryId, categoryName, isOpen }: AddPostModalProps) {
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-  });
+export default function AddPostModal({ isOpen, onClose, categoryName }: AddPostModalProps) {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement add post logic
-    console.log('Add post data:', { ...formData, categoryId });
-    onClose();
+    console.log("Add post:", { title, content, categoryName });
   };
 
   return (
-    <ModalLayout title={`Add Post to ${categoryName}`} onClose={onClose} isOpen={isOpen}>
+    <ModalLayout isOpen={isOpen} onClose={onClose} title={`Add Post in ${categoryName}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <FormInput
-          id="title"
+        <Input
+          type="text"
           label="Title"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
           required
         />
 
-        <FormTextarea
-          id="content"
+        <Input
+          multiline
           label="Content"
-          value={formData.content}
-          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          rows={8}
           required
-          minHeight="150px"
         />
 
-        <hr className="border-gray-700 my-6" />
-
-        <div className="flex gap-4">
-          <Button
-            type="button"
-            onClick={onClose}
-            variant="secondary"
-            fullWidth
-          >
+        <div className="flex gap-4 mt-8 mb-4">
+          <Button variant="secondary" type="button" fullWidth onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            fullWidth
-          >
+          <Button variant="primary" type="submit" fullWidth>
             Add Post
           </Button>
         </div>

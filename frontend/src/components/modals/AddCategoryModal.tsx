@@ -1,61 +1,48 @@
-import { useState } from 'react';
-import ModalLayout from './ModalLayout';
-import FormInput from '../common/FormInput';
-import FormTextarea from '../common/FormTextarea';
-import Button from '../common/Button';
+import { useState } from "react";
+import ModalLayout from "./ModalLayout";
+import Button from "../common/Button";
+import Input from "../common/Input";
 
 interface AddCategoryModalProps {
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export default function AddCategoryModal({ onClose }: AddCategoryModalProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-  });
+export default function AddCategoryModal({ isOpen, onClose }: AddCategoryModalProps) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement add category logic
-    console.log('Add category data:', formData);
-    onClose();
+    console.log("Add category:", { name, description });
   };
 
   return (
-    <ModalLayout title="Add Category" onClose={onClose}>
+    <ModalLayout isOpen={isOpen} onClose={onClose} title="Add Category">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <FormInput
-          id="name"
+        <Input
+          type="text"
           label="Category Name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           required
         />
 
-        <FormTextarea
-          id="description"
+        <Input
+          multiline
           label="Description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={4}
           required
         />
 
-        <hr className="border-gray-700 my-6" />
-
-        <div className="flex gap-4">
-          <Button
-            type="button"
-            onClick={onClose}
-            variant="secondary"
-            fullWidth
-          >
+        <div className="flex gap-4 mt-8 mb-4">
+          <Button variant="secondary" type="button" fullWidth onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            fullWidth
-          >
+          <Button variant="primary" type="submit" fullWidth>
             Add Category
           </Button>
         </div>
