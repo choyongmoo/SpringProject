@@ -1,5 +1,0 @@
-package ac.yuhan.backend.controller;
-
-public class PostController {
-    
-}
