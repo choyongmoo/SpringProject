@@ -1,37 +1,34 @@
 package ac.yuhan.backend.security;
 
+import ac.yuhan.backend.domain.user.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import java.util.Collections;
+
 import java.util.Collection;
+import java.util.Collections;
 
-public class CustomUserDetails implements UserDetails {
+public class SecurityUserDetails implements UserDetails {
 
-    private final String username;
-    private final Long userId;
+    private final User user;
 
-    public CustomUserDetails(String username, Long userId) {
-        this.username = username;
-        this.userId = userId;
-    }
-
-    public Long getUserId() {
-        return userId;
+    public SecurityUserDetails(User user) {
+        this.user = user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
     public String getPassword() {
-        return null;
+        return user.getPasswordHash();
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return user.getUsername();
     }
 
     @Override
@@ -52,5 +49,9 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public User getUser() {
+        return user;
     }
 }

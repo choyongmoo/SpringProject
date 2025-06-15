@@ -2,6 +2,7 @@ import { useState } from "react";
 import ModalLayout from "./ModalLayout";
 import Button from "../common/Button";
 import Input from "../common/Input";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -9,23 +10,35 @@ interface SignInModalProps {
 }
 
 export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { signin } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement sign in logic
-    console.log("Sign in:", { name, password });
+    setError("");
+
+    try {
+      await signin({ username, password });
+      onClose();
+    } catch (err) {
+      setError("Invalid username or password");
+    }
   };
 
   return (
     <ModalLayout isOpen={isOpen} onClose={onClose} title="Sign In">
       <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="text-red-500 text-sm">{error}</div>
+        )}
+
         <Input
           type="text"
-          label="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          label="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
         />
 

@@ -1,0 +1,13 @@
+package ac.yuhan.backend.domain.post.dto;
+
+import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class PostsResponse {
+
+    private List<PostResponse> posts;
+}

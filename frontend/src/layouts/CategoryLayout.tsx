@@ -1,12 +1,25 @@
 import { Outlet, useParams, Link } from "react-router";
-import { categories } from "../data/categories";
+import { useState, useEffect } from "react";
 import ArrowButton from "../components/common/ArrowButton";
+import { categoryService } from "../services/categoryService";
+import type { CategoryResponse } from "../services/categoryService";
 
 export default function CategoryLayout() {
   const { categoryName } = useParams();
-  const category = categories.find(
-    (cat) => cat.name.toLowerCase() === categoryName?.toLowerCase()
-  );
+  const [category, setCategory] = useState<CategoryResponse | null>(null);
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      if (!categoryName) return;
+      try {
+        const categoryData = await categoryService.getCategory(categoryName);
+        setCategory(categoryData);
+      } catch (error) {
+        console.error('Failed to fetch category:', error);
+      }
+    };
+    fetchCategory();
+  }, [categoryName]);
 
   if (!category) {
     return <div>Category not found</div>;

@@ -2,21 +2,30 @@ import { useState } from "react";
 import ModalLayout from "./ModalLayout";
 import Button from "../common/Button";
 import Input from "../common/Input";
+import { postService } from "../../services/postService";
 
 interface AddPostModalProps {
   isOpen: boolean;
   onClose: () => void;
   categoryName: string;
+  onSuccess?: () => void;
 }
 
-export default function AddPostModal({ isOpen, onClose, categoryName }: AddPostModalProps) {
+export default function AddPostModal({ isOpen, onClose, categoryName, onSuccess }: AddPostModalProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement add post logic
-    console.log("Add post:", { title, content, categoryName });
+    try {
+      await postService.createPost({ title, content, categoryName });
+      setTitle("");
+      setContent("");
+      onClose();
+      onSuccess?.();
+    } catch (error) {
+      console.error('Failed to create post:', error);
+    }
   };
 
   return (

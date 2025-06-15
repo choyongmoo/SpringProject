@@ -2,20 +2,30 @@ import { useState } from "react";
 import ModalLayout from "./ModalLayout";
 import Button from "../common/Button";
 import Input from "../common/Input";
+import { categoryService } from "../../services/categoryService";
 
 interface AddCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function AddCategoryModal({ isOpen, onClose }: AddCategoryModalProps) {
+export default function AddCategoryModal({ isOpen, onClose, onSuccess }: AddCategoryModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement add category logic
-    console.log("Add category:", { name, description });
+    try {
+      const formattedName = name.trim().replace(/\s+/g, '_').toLowerCase();
+      await categoryService.createCategory({ name: formattedName, description });
+      setName("");
+      setDescription("");
+      onClose();
+      onSuccess?.();
+    } catch (error) {
+      console.error('Failed to create category:', error);
+    }
   };
 
   return (

@@ -1,12 +1,21 @@
 package ac.yuhan.backend.controller;
 
-
-import ac.yuhan.backend.domain.auth.dto.SignUpRequest;
-import ac.yuhan.backend.domain.auth.AuthService;
-import ac.yuhan.backend.domain.auth.dto.SignInRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import java.util.Collections;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import ac.yuhan.backend.domain.auth.AuthService;
+import ac.yuhan.backend.domain.auth.dto.SigninRequest;
+import ac.yuhan.backend.domain.auth.dto.SigninResponse;
+import ac.yuhan.backend.domain.auth.dto.SignupRequest;
+import ac.yuhan.backend.domain.user.dto.UserResponse;
+import ac.yuhan.backend.security.SecurityUserDetails;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -19,21 +28,18 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody SignUpRequest request) {
-        try {
-            authService.signup(request);
-            return ResponseEntity.ok("회원가입 성공");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<SigninResponse> signup(@Valid @RequestBody SignupRequest request) {
+        return ResponseEntity.ok(authService.signup(request));
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> signin(@RequestBody SignInRequest request) {
-        try {
-            return ResponseEntity.ok(authService.signin(request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(401).body(Collections.singletonMap("error", e.getMessage()));
-        }
+    public ResponseEntity<SigninResponse> signin(@Valid @RequestBody SigninRequest request) {
+        return ResponseEntity.ok(authService.signin(request));
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponse> me(@AuthenticationPrincipal SecurityUserDetails userDetails) {
+        return ResponseEntity.ok(new UserResponse(userDetails.getUser()));
     }
 }

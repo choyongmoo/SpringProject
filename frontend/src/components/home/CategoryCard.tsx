@@ -1,13 +1,26 @@
 import { Link } from "react-router";
+import { useState, useEffect } from "react";
 import Card from "../common/Card";
 import PostCard from "./PostCard";
-import type { Category } from "../../data/categories";
+import type { CategoryResponse } from "../../services/categoryService";
+import type { PostResponse } from "../../services/postService";
+import { categoryService } from "../../services/categoryService";
 
 interface CategoryCardProps {
-  category: Category;
+  category: CategoryResponse;
 }
 
 export default function CategoryCard({ category }: CategoryCardProps) {
+  const [posts, setPosts] = useState<PostResponse[]>([]);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const response = await categoryService.getAllPosts(category.name);
+      setPosts(response.posts);
+    };
+    fetchPosts();
+  }, [category.name]);
+
   return (
     <Card
       variant="primary"
@@ -24,7 +37,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
       </div>
 
       <div className="grid gap-4">
-        {category.posts.map((post) => (
+        {posts.map((post) => (
           <PostCard
             key={post.id}
             post={post}

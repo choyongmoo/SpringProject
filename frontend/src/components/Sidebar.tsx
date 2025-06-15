@@ -2,12 +2,14 @@ import { useState } from "react";
 import Brand from "./common/Brand";
 import Button from "./common/Button";
 import Intro from "./common/Intro";
-import SignInModal from "./modals/SignInModal";
-import SignUpModal from "./modals/SignUpModal";
+import SignInModal from "./modals/SigninModal";
+import SignUpModal from "./modals/SignupModal";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Sidebar() {
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const { user, isAuthenticated, signout } = useAuth();
 
   return (
     <>
@@ -17,22 +19,47 @@ export default function Sidebar() {
           <Intro />
         </div>
 
-        <div className="space-y-4">
-          <Button
-            variant="primary"
-            fullWidth
-            onClick={() => setIsSignInOpen(true)}
-          >
-            Sign In
-          </Button>
-          <Button
-            variant="outline"
-            fullWidth
-            onClick={() => setIsSignUpOpen(true)}
-          >
-            Sign Up
-          </Button>
-        </div>
+        {isAuthenticated ? (
+          <div className="space-y-6">
+            <div className="bg-background-dark p-4 rounded-lg space-y-2">
+              <div className="text-sm text-gray-400">Username</div>
+              <div className="font-medium">{user?.username}</div>
+
+              <div className="text-sm text-gray-400 mt-3">Email</div>
+              <div className="font-medium">{user?.email}</div>
+
+              <div className="text-sm text-gray-400 mt-3">Member since</div>
+              <div className="font-medium">
+                {new Date(user?.createdAt || "").toLocaleDateString()}
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={signout}
+            >
+              Sign Out
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <Button
+              variant="primary"
+              fullWidth
+              onClick={() => setIsSignInOpen(true)}
+            >
+              Sign In
+            </Button>
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={() => setIsSignUpOpen(true)}
+            >
+              Sign Up
+            </Button>
+          </div>
+        )}
       </div>
 
       <SignInModal
