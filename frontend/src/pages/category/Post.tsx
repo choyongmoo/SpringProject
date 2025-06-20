@@ -1,32 +1,40 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { Button } from "../../components/common/Button";
-import { Card } from "../../components/common/Card";
-import { Loading } from "../../components/common/Loading";
-import { Textarea } from "../../components/common/Textarea";
+import { Button, Card, CommentCard, CommentForm, Loading, PostForm } from "../../components/common";
 import { useAuth } from "../../hooks/useAuth";
 import { usePost, usePostComments } from "../../hooks/usePosts";
-import { deleteComment } from "../../services/commentService";
-import { createComment, deletePost } from "../../services/postService";
+import { deleteComment, updateComment } from "../../services/commentService";
+import { createComment, deletePost, updatePost } from "../../services/postService";
 
 export const Post: React.FC = () => {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
-  const { post, loading: postLoading } = usePost(Number(postId));
+  const { post, loading: postLoading, refetch: refetchPost } = usePost(Number(postId));
   const {
     postComments,
     loading: commentsLoading,
-    refetch,
+    refetch: refetchComments,
   } = usePostComments(Number(postId));
   const { isAuthenticated, user } = useAuth();
 
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [commentContent, setCommentContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [deletingCommentId, setDeletingCommentId] = useState<number | null>(
-    null
-  );
+  const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null);
   const [deletingPost, setDeletingPost] = useState(false);
+
+  // 댓글 수정 관련 상태
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editingContent, setEditingContent] = useState("");
+  const [updatingComment, setUpdatingComment] = useState(false);
+
+  // 게시글 수정 관련 상태
+  const [editingPost, setEditingPost] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    title: "",
+    content: "",
+  });
+  const [updatingPost, setUpdatingPost] = useState(false);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +47,7 @@ export const Post: React.FC = () => {
       });
       setCommentContent("");
       setShowCommentForm(false);
-      refetch();
+      refetchComments();
     } catch (error) {
       console.error("Failed to create comment:", error);
     } finally {
@@ -48,12 +56,10 @@ export const Post: React.FC = () => {
   };
 
   const handleDeleteComment = async (commentId: number) => {
-    if (!confirm("이 댓글을 삭제하시겠습니까?")) return;
-
     setDeletingCommentId(commentId);
     try {
       await deleteComment(commentId);
-      refetch();
+      refetchComments();
     } catch (error) {
       console.error("Failed to delete comment:", error);
     } finally {
@@ -61,9 +67,77 @@ export const Post: React.FC = () => {
     }
   };
 
-  const handleDeletePost = async () => {
-    if (!postId || !confirm("이 게시글을 삭제하시겠습니까?")) return;
+  const handleEditComment = (commentId: number, currentContent: string) => {
+    setEditingCommentId(commentId);
+    setEditingContent(currentContent);
+  };
 
+  const handleUpdateComment = async (commentId: number) => {
+    if (!editingContent.trim()) return;
+
+    setUpdatingComment(true);
+    try {
+      await updateComment(commentId, {
+        content: editingContent,
+      });
+      setEditingCommentId(null);
+      setEditingContent("");
+      refetchComments();
+    } catch (error) {
+      console.error("Failed to update comment:", error);
+    } finally {
+      setUpdatingComment(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditingContent("");
+  };
+
+  const handleEditPost = () => {
+    if (!post) return;
+    setEditingPost(true);
+    setEditFormData({
+      title: post.title,
+      content: post.content,
+    });
+  };
+
+  const handleUpdatePost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!postId || !editFormData.title.trim() || !editFormData.content.trim()) return;
+
+    setUpdatingPost(true);
+    try {
+      await updatePost(Number(postId), {
+        title: editFormData.title,
+        content: editFormData.content,
+      });
+      setEditingPost(false);
+      setEditFormData({ title: "", content: "" });
+      refetchPost();
+    } catch (error) {
+      console.error("Failed to update post:", error);
+    } finally {
+      setUpdatingPost(false);
+    }
+  };
+
+  const handleCancelEditPost = () => {
+    setEditingPost(false);
+    setEditFormData({ title: "", content: "" });
+  };
+
+  const handleTitleChange = (title: string) => {
+    setEditFormData((prev) => ({ ...prev, title }));
+  };
+
+  const handleContentChange = (content: string) => {
+    setEditFormData((prev) => ({ ...prev, content }));
+  };
+
+  const handleDeletePost = async () => {
     setDeletingPost(true);
     try {
       await deletePost(Number(postId));
@@ -105,34 +179,59 @@ export const Post: React.FC = () => {
         </Link>
       </div>
 
-      <Card className="mb-8">
-        <div className="card-header">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h1 className="card-title text-2xl">{post.title}</h1>
-              <div className="flex items-center gap-4 text-sm text-text-secondary">
-                <span>작성자: {post.authorName}</span>
-                <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+      <Card className={`mb-8 ${isAuthenticated && user?.username === post.authorName ? 'border-2 border-accent-primary' : ''}`}>
+        {editingPost ? (
+          <PostForm
+            title={editFormData.title}
+            content={editFormData.content}
+            onTitleChange={handleTitleChange}
+            onContentChange={handleContentChange}
+            onSubmit={handleUpdatePost}
+            onCancel={handleCancelEditPost}
+            submitting={updatingPost}
+            submitText="수정 완료"
+            titlePlaceholder="게시글 제목을 입력하세요"
+            contentPlaceholder="게시글 내용을 작성하세요..."
+          />
+        ) : (
+          <>
+            <div className="card-header">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h1 className="card-title text-2xl">{post.title}</h1>
+                  <div className="flex items-center gap-4 text-sm text-text-secondary">
+                    <span>작성자: {post.authorName}</span>
+                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                {isAuthenticated && user?.username === post.authorName && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleEditPost}
+                    >
+                      수정
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={handleDeletePost}
+                      loading={deletingPost}
+                    >
+                      삭제
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
-            {isAuthenticated && user?.username === post.authorName && (
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={handleDeletePost}
-                loading={deletingPost}
-                className="ml-4 flex-shrink-0"
-              >
-                게시글 삭제
-              </Button>
-            )}
-          </div>
-        </div>
-        <div className="prose prose-invert max-w-none">
-          <p className="text-text-primary whitespace-pre-wrap">
-            {post.content}
-          </p>
-        </div>
+            <div className="prose prose-invert max-w-none">
+              <p className="text-text-primary whitespace-pre-wrap">
+                {post.content}
+              </p>
+            </div>
+          </>
+        )}
       </Card>
 
       <div className="mb-6">
@@ -153,70 +252,35 @@ export const Post: React.FC = () => {
       </div>
 
       {showCommentForm && (
-        <Card className="mb-6">
-          <form onSubmit={handleSubmitComment} className="space-y-4">
-            <Textarea
-              label="댓글 내용"
-              value={commentContent}
-              onChange={(e) => setCommentContent(e.target.value)}
-              required
-              placeholder="댓글을 작성하세요..."
-            />
-
-            <div className="flex gap-3">
-              <Button
-                type="submit"
-                loading={submitting}
-                disabled={!commentContent.trim()}
-              >
-                댓글 작성
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setShowCommentForm(false)}
-              >
-                취소
-              </Button>
-            </div>
-          </form>
-        </Card>
+        <CommentForm
+          content={commentContent}
+          onContentChange={setCommentContent}
+          onSubmit={handleSubmitComment}
+          onCancel={() => setShowCommentForm(false)}
+          submitting={submitting}
+        />
       )}
 
       <div className="space-y-4">
         {postComments?.comments?.map((comment) => (
-          <Card key={comment.id}>
-            <div className="flex items-start gap-3">
-              <div className="avatar-sm bg-bg-tertiary flex items-center justify-center text-text-secondary font-semibold">
-                {comment.authorName.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-text-primary">
-                      {comment.authorName}
-                    </span>
-                    <span className="text-sm text-text-secondary">
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  {isAuthenticated && user?.username === comment.authorName && (
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDeleteComment(comment.id)}
-                      loading={deletingCommentId === comment.id}
-                    >
-                      삭제
-                    </Button>
-                  )}
-                </div>
-                <p className="text-text-primary whitespace-pre-wrap">
-                  {comment.content}
-                </p>
-              </div>
-            </div>
-          </Card>
+          <div
+            key={comment.id}
+            className={`${isAuthenticated && user?.username === comment.authorName ? 'border-2 border-accent-primary rounded-lg' : ''}`}
+          >
+            <CommentCard
+              comment={comment}
+              isEditing={editingCommentId === comment.id}
+              editingContent={editingContent}
+              onEdit={handleEditComment}
+              onUpdate={handleUpdateComment}
+              onCancelEdit={handleCancelEdit}
+              onDelete={handleDeleteComment}
+              onContentChange={setEditingContent}
+              isAuthor={isAuthenticated && user?.username === comment.authorName}
+              updatingComment={updatingComment}
+              deletingCommentId={deletingCommentId}
+            />
+          </div>
         ))}
       </div>
 

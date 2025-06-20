@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { Link, useParams } from "react-router";
-import { Button } from "../../components/common/Button";
-import { Card } from "../../components/common/Card";
-import { Input } from "../../components/common/Input";
-import { Loading } from "../../components/common/Loading";
-import { Textarea } from "../../components/common/Textarea";
+import { Button, Card, Loading, PostForm } from "../../components/common";
 import { useAuth } from "../../hooks/useAuth";
 import { useCategory, useCategoryPosts } from "../../hooks/useCategories";
 import { createPost } from "../../services/categoryService";
@@ -52,8 +48,6 @@ export const Category: React.FC = () => {
   };
 
   const handleDeletePost = async (postId: number) => {
-    if (!confirm("이 게시글을 삭제하시겠습니까?")) return;
-
     setDeletingPostId(postId);
     try {
       await deletePost(postId);
@@ -65,17 +59,16 @@ export const Category: React.FC = () => {
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  const handleTitleChange = (title: string) => {
+    setFormData((prev) => ({ ...prev, title }));
+  };
+
+  const handleContentChange = (content: string) => {
+    setFormData((prev) => ({ ...prev, content }));
   };
 
   if (categoryLoading || postsLoading) {
-    return <Loading text="Loading category..." />;
+    return <Loading text="카테고리를 불러오는 중..." />;
   }
 
   if (!category) {
@@ -83,10 +76,10 @@ export const Category: React.FC = () => {
       <div className="container py-8">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-text-primary mb-2">
-            Category Not Found
+            카테고리를 찾을 수 없습니다
           </h2>
           <p className="text-text-secondary">
-            The category you're looking for doesn't exist.
+            요청하신 카테고리가 존재하지 않습니다.
           </p>
         </div>
       </div>
@@ -115,49 +108,24 @@ export const Category: React.FC = () => {
       </div>
 
       {showCreateForm && (
-        <Card className="mb-8">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label="제목"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              placeholder="게시글 제목을 입력하세요"
-            />
-
-            <Textarea
-              label="내용"
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              required
-              placeholder="게시글 내용을 작성하세요..."
-            />
-
-            <div className="flex gap-3">
-              <Button
-                type="submit"
-                loading={submitting}
-                disabled={!formData.title || !formData.content}
-              >
-                게시글 작성
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setShowCreateForm(false)}
-              >
-                취소
-              </Button>
-            </div>
-          </form>
-        </Card>
+        <PostForm
+          title={formData.title}
+          content={formData.content}
+          onTitleChange={handleTitleChange}
+          onContentChange={handleContentChange}
+          onSubmit={handleSubmit}
+          onCancel={() => setShowCreateForm(false)}
+          submitting={submitting}
+          submitText="게시글 작성"
+        />
       )}
 
       <div className="space-y-4">
         {categoryPosts?.posts?.map((post) => (
-          <Card key={post.id} className="hover:shadow-md transition-shadow">
+          <Card
+            key={post.id}
+            className={`hover:shadow-md transition-shadow ${isAuthenticated && user?.username === post.authorName ? 'border-2 border-accent-primary' : ''}`}
+          >
             <div className="flex items-start justify-between">
               <Link to={`/category/${categoryName}/${post.id}`} className="flex-1">
                 <div className="card-header">
