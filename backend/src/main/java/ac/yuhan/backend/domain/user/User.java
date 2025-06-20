@@ -32,9 +32,6 @@ public class User {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false, length = 255)
-    private String profileImageUrl;
-
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -50,7 +47,6 @@ public class User {
     @PrePersist
     void onCreate() {
         this.createdAt = LocalDateTime.now();
-        this.profileImageUrl = "resources/uploads/default_profile.png";
     }
 
     @Override

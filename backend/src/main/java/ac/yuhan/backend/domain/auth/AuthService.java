@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import ac.yuhan.backend.domain.auth.dto.SigninRequest;
 import ac.yuhan.backend.domain.auth.dto.SigninResponse;
@@ -14,6 +13,7 @@ import ac.yuhan.backend.domain.auth.dto.SignupRequest;
 import ac.yuhan.backend.domain.user.User;
 import ac.yuhan.backend.domain.user.UserRepository;
 import ac.yuhan.backend.domain.user.UserService;
+import ac.yuhan.backend.domain.user.dto.UserResponse;
 import ac.yuhan.backend.security.JwtTokenProvider;
 
 @Service
@@ -23,7 +23,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserService userService;
 
     public AuthService(
             UserRepository userRepository,
@@ -35,11 +34,10 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
-        this.userService = userService;
     }
 
     @Transactional
-    public SigninResponse signup(SignupRequest request, MultipartFile profileImage) {
+    public SigninResponse signup(SignupRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username already exists");
         }
@@ -52,21 +50,20 @@ public class AuthService {
         user.setUsername(request.getUsername());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
-        if (profileImage != null && !profileImage.isEmpty()) {
-            userService.uploadProfileImage(user, profileImage);
-        }
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         String token = authenticate(request.getUsername(), request.getPassword());
 
-        return new SigninResponse(token);
+        return new SigninResponse(token, new UserResponse(user));
     }
 
     public SigninResponse signin(SigninRequest request) {
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
         String token = authenticate(request.getUsername(), request.getPassword());
 
-        return new SigninResponse(token);
+        return new SigninResponse(token, new UserResponse(user));
     }
 
     private String authenticate(String username, String password) {

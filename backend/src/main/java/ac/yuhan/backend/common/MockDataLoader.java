@@ -1,7 +1,5 @@
 package ac.yuhan.backend.common;
 
-import java.time.LocalDateTime;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +40,7 @@ public class MockDataLoader {
                 }
 
                 // Create users
-                User admin = createUser("admin", "admin@forum.com", "admin123");
+                User string = createUser("string", "string@forum.com", "string");
                 User john = createUser("john", "john@example.com", "password123");
                 User sarah = createUser("sarah", "sarah@example.com", "password123");
                 User mike = createUser("mike", "mike@example.com", "password123");
@@ -55,7 +53,7 @@ public class MockDataLoader {
 
                 // Create categories with kebab-case names
                 Category generalDiscussion = createCategory("general-discussion", "General topics and discussions",
-                                admin);
+                                string);
                 Category technology = createCategory("technology", "Tech news, programming, and software discussions",
                                 john);
                 Category gaming = createCategory("gaming", "Video games, board games, and gaming culture", sarah);
@@ -72,7 +70,7 @@ public class MockDataLoader {
                 // Create posts
                 Post welcomePost = createPost("Welcome to Our Forum!",
                                 "Welcome everyone! This is a great place to discuss various topics. Feel free to introduce yourself and start participating in discussions.",
-                                generalDiscussion, admin);
+                                generalDiscussion, string);
 
                 Post springBootPost = createPost("Getting Started with Spring Boot",
                                 "Spring Boot is a powerful framework for building Java applications. In this post, I'll share some tips for beginners.\n\n"
@@ -169,7 +167,7 @@ public class MockDataLoader {
                                                 "- New language models with improved reasoning\n- AI in healthcare applications\n- Ethical considerations in AI development\n\n"
                                                 +
                                                 "What are your thoughts on the future of AI?",
-                                technology, admin);
+                                technology, string);
 
                 // Create comments
                 createComment("Thanks for the welcome! Looking forward to being part of this community.", welcomePost,
@@ -181,7 +179,7 @@ public class MockDataLoader {
                 createComment("Spring Boot is indeed amazing! The auto-configuration feature saves so much time.",
                                 springBootPost, sarah);
                 createComment("I've been using Spring Boot for 2 years now. It's revolutionized how I build applications.",
-                                springBootPost, admin);
+                                springBootPost, string);
                 createComment("Any recommendations for learning resources?", springBootPost, emma);
                 createComment("The embedded server feature is a game-changer for development.", springBootPost, alex);
 
@@ -204,7 +202,7 @@ public class MockDataLoader {
 
                 createComment("The underdogs always make it interesting! Rooting for them too.", sportsPost, sarah);
                 createComment("This season has been full of surprises. Can't wait to see how it ends!", sportsPost,
-                                admin);
+                                string);
                 createComment("The playoffs are going to be intense this year.", sportsPost, david);
 
                 createComment("That pasta carbonara recipe sounds delicious! Do you have the full recipe?", recipePost,
@@ -249,8 +247,6 @@ public class MockDataLoader {
                 user.setUsername(username);
                 user.setEmail(email);
                 user.setPasswordHash(passwordEncoder.encode(password));
-                user.setProfileImageUrl("/uploads/default_profile.png");
-                user.setCreatedAt(LocalDateTime.now());
                 return userRepository.save(user);
         }
 
@@ -268,7 +264,6 @@ public class MockDataLoader {
                 post.setContent(content);
                 post.setCategory(category);
                 post.setAuthor(author);
-                post.setCreatedAt(LocalDateTime.now());
                 return postRepository.save(post);
         }
 
@@ -277,7 +272,6 @@ public class MockDataLoader {
                 comment.setContent(content);
                 comment.setPost(post);
                 comment.setAuthor(author);
-                comment.setCreatedAt(LocalDateTime.now());
                 return commentRepository.save(comment);
         }
 }

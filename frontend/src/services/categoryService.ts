@@ -66,8 +66,9 @@ export const getCategoryPosts = async (
 };
 
 export const createPost = async (
+  name: string,
   request: CreatePostRequest
 ): Promise<PostResponse> => {
-  const response = await api.post("/posts", request);
+  const response = await api.post(`/category/${name}/posts`, request);
   return response.data;
 };

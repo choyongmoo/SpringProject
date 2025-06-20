@@ -6,13 +6,13 @@ export interface Post {
   title: string;
   content: string;
   authorName: string;
+  categoryName: string;
   createdAt: Date;
 }
 
 export interface CreatePostRequest {
   title: string;
   content: string;
-  categoryName: string;
 }
 
 export interface PostCommentsResponse extends PostResponse {
@@ -24,6 +24,7 @@ export interface PostResponse {
   title: string;
   content: string;
   authorName: string;
+  categoryName: string;
   createdAt: Date;
 }
 

@@ -7,10 +7,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import ac.yuhan.backend.domain.user.UserService;
 import ac.yuhan.backend.domain.user.dto.UpdateUserRequest;
@@ -36,15 +35,14 @@ public class UserController {
         return ResponseEntity.ok(userService.getUser(name));
     }
 
-    @PutMapping(value = "/{name}", consumes = "multipart/form-data")
+    @PutMapping("/{name}")
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<UserResponse> updateUser(
             @PathVariable String name,
             @AuthenticationPrincipal SecurityUserDetails userDetails,
-            @RequestPart("data") @Valid UpdateUserRequest request,
-            @RequestPart(value = "file", required = false) MultipartFile profileImage) {
-        return ResponseEntity.ok(userService.updateUser(name, userDetails.getUser(), request, profileImage));
+            @RequestBody @Valid UpdateUserRequest request) {
+        return ResponseEntity.ok(userService.updateUser(name, userDetails.getUser(), request));
     }
 
     @DeleteMapping("/{name}")

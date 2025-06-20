@@ -1,5 +1,5 @@
 import api from "./api";
-import type { User } from "./userService";
+import type { UserResponse } from "./userService";
 
 interface SignupRequest {
   username: string;
@@ -14,15 +14,13 @@ interface SigninRequest {
 
 interface SigninResponse {
   token: string;
-  user: User;
+  user: UserResponse;
 }
 
-export const signup = async (
-  request: SignupRequest
-): Promise<SigninResponse> => {
+export async function signup(request: SignupRequest) {
   const response = await api.post("/auth/signup", request);
   return response.data;
-};
+}
 
 export const signin = async (
   request: SigninRequest

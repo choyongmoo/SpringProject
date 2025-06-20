@@ -14,14 +14,11 @@ public class UserResponse {
 
     private String email;
 
-    private String profileImageUrl;
-
     private LocalDateTime createdAt;
 
     public UserResponse(User user) {
         this.username = user.getUsername();
         this.email = user.getEmail();
-        this.profileImageUrl = user.getProfileImageUrl();
         this.createdAt = user.getCreatedAt();
     }
 }

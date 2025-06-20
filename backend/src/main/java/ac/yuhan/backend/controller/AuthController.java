@@ -4,9 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import ac.yuhan.backend.domain.auth.AuthService;
 import ac.yuhan.backend.domain.auth.dto.SigninRequest;
@@ -26,11 +24,9 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping(value = "/signup", consumes = "multipart/form-data")
-    public ResponseEntity<SigninResponse> signup(
-            @RequestPart("data") @Valid SignupRequest request,
-            @RequestPart(value = "file", required = false) MultipartFile profileImage) {
-        return ResponseEntity.ok(authService.signup(request, profileImage));
+    @PostMapping("/signup")
+    public ResponseEntity<SigninResponse> signup(@Valid @RequestBody SignupRequest request) {
+        return ResponseEntity.ok(authService.signup(request));
     }
 
     @PostMapping("/signin")

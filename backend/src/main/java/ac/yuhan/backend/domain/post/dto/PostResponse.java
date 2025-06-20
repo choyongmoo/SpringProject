@@ -18,6 +18,8 @@ public class PostResponse {
 
     private String authorName;
 
+    private String categoryName;
+
     private LocalDateTime createdAt;
 
     public PostResponse(Post post) {
@@ -25,6 +27,7 @@ public class PostResponse {
         this.title = post.getTitle();
         this.content = post.getContent();
         this.authorName = post.getAuthor().getUsername();
+        this.categoryName = post.getCategory().getName();
         this.createdAt = post.getCreatedAt();
     }
 }

@@ -5,9 +5,8 @@ import type { User } from "../services/userService";
 interface AuthState {
   token: string | null;
   user: User | null;
-  setToken: (token: string) => void;
-  setUser: (user: User) => void;
-  signout: () => void;
+  setAuth: (token: string, user: User) => void;
+  clearAuth: () => void;
 }
 
 export const useAuthStore = create(
@@ -15,9 +14,8 @@ export const useAuthStore = create(
     (set) => ({
       token: null,
       user: null,
-      setToken: (token: string) => set({ token }),
-      setUser: (user: User) => set({ user }),
-      signout: () => set({ token: null, user: null }),
+      setAuth: (token: string, user: User) => set({ token, user }),
+      clearAuth: () => set({ token: null, user: null }),
     }),
     {
       name: "auth",
