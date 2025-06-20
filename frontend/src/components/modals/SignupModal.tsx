@@ -1,8 +1,7 @@
-import { useState } from "react";
 import ModalLayout from "./ModalLayout";
 import Button from "../common/Button";
 import Input from "../common/Input";
-import { useAuth } from "../../contexts/AuthContext";
+import { useSignupModal } from "../../hooks/useSignupModal";
 
 interface SignUpModalProps {
   isOpen: boolean;
@@ -10,29 +9,18 @@ interface SignUpModalProps {
 }
 
 export default function SignUpModal({ isOpen, onClose }: SignUpModalProps) {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const { signup } = useAuth();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    try {
-      await signup({ username, email, password });
-      onClose();
-    } catch (err) {
-      setError("Failed to create account.");
-    }
-  };
+  const {
+    username,
+    setUsername,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    error,
+    handleSubmit,
+  } = useSignupModal(onClose);
 
   return (
     <ModalLayout isOpen={isOpen} onClose={onClose} title="Sign Up">

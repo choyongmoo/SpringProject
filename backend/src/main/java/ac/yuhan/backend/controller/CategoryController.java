@@ -1,22 +1,15 @@
 package ac.yuhan.backend.controller;
 
-import java.net.URI;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import ac.yuhan.backend.domain.category.Category;
 import ac.yuhan.backend.domain.category.CategoryService;
+import ac.yuhan.backend.domain.category.dto.CategoryRequest;
 import ac.yuhan.backend.domain.category.dto.CategoryResponse;
-import ac.yuhan.backend.domain.category.dto.CategoriesResponse;
-import ac.yuhan.backend.domain.category.dto.CreateCategoryRequest;
-import ac.yuhan.backend.domain.post.dto.PostsResponse;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -28,27 +21,58 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @GetMapping
-    public ResponseEntity<CategoriesResponse> getAllCategories() {
-        return ResponseEntity.ok(categoryService.getAllCategories());
-    }
-
-    @GetMapping("/{name}")
-    public ResponseEntity<CategoryResponse> getCategory(@PathVariable String name) {
-        return ResponseEntity.ok(categoryService.getCategory(name));
-    }
-
+    //카테고리 생성
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
-        CategoryResponse category = categoryService.createCategory(request);
-        return ResponseEntity.created(URI.create("/api/categories/" + category.getName()))
-                .body(category);
+    public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryRequest request) {
+        Category category = new Category();
+        category.setName(request.getName());
+        category.setDescription(request.getDescription());
+        Category created = categoryService.createCategory(category);
+        return ResponseEntity.ok(toResponse(created));
     }
 
-    @GetMapping("/{name}/posts")
-    public ResponseEntity<PostsResponse> getAllPosts(@PathVariable String name) {
-        return ResponseEntity.ok(categoryService.getAllPosts(name));
+    //모든 카테고리 목록 조회
+    @GetMapping
+    public ResponseEntity<List<CategoryResponse>> getAllCategories() {
+        List<CategoryResponse> responses = categoryService.getAllCategories()
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 
+    //특정 id의 카테고리 상세 조회
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
+        return categoryService.getCategoryById(id)
+                .map(this::toResponse)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    //특정 id의 카테고리 수정
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryResponse> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
+        Category updatedCategory = new Category();
+        updatedCategory.setName(request.getName());
+        updatedCategory.setDescription(request.getDescription());
+
+        try {
+            Category updated = categoryService.updateCategory(id, updatedCategory);
+            return ResponseEntity.ok(toResponse(updated));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    //특정 id의 카테고리 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        categoryService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    private CategoryResponse toResponse(Category category) {
+        return new CategoryResponse(category.getId(), category.getName(), category.getDescription());
+    }
 }

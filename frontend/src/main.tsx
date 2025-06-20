@@ -1,16 +1,24 @@
-import { StrictMode } from 'react'
+import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import App from './App.tsx'
 import './index.css'
-import { AuthProvider } from './contexts/AuthContext.tsx'
+import { useAuthStore } from './stores/authStore.ts'
+
+function AppWrapper() {
+  const initAuth = useAuthStore(state => state.initAuth);
+
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
+
+  return <App />;
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </AuthProvider>
+    <BrowserRouter>
+      <AppWrapper />
+    </BrowserRouter>
   </StrictMode>,
 )

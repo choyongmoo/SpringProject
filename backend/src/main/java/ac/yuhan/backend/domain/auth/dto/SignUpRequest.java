@@ -1,17 +1,22 @@
 package ac.yuhan.backend.domain.auth.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import ac.yuhan.backend.domain.user.User;
 import lombok.Data;
 
 @Data
-public class SignupRequest {
-
-    @NotBlank
+public class SignUpRequest {
     private String username;
-
-    @NotBlank
     private String password;
-
-    @NotBlank
     private String email;
+    private String major;
+
+    public User toEntity(String endcodedPassword) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(endcodedPassword);
+        user.setEmail(email);
+        user.setMajor(major);
+        
+        return user;
+    }
 }

@@ -1,57 +1,23 @@
-import { useParams } from "react-router";
-import { useState, useEffect } from "react";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import ReplyCard from "../../components/category/ReplyCard";
 import SigninModal from "../../components/modals/SigninModal";
-import { useAuth } from "../../contexts/AuthContext";
-import { postService } from "../../services/postService";
-import type { PostResponse } from "../../services/postService";
-import type { CommentResponse } from "../../services/postService";
+import { usePostPage } from "../../hooks/usePostPage";
 
 export default function Post() {
-  const { postId } = useParams();
-  const [comment, setComment] = useState("");
-  const [post, setPost] = useState<PostResponse | null>(null);
-  const [comments, setComments] = useState<CommentResponse[]>([]);
-  const [isSigninOpen, setIsSigninOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
-
-  useEffect(() => {
-    const fetchPostAndComments = async () => {
-      if (!postId) return;
-      try {
-        const postData = await postService.getPost(Number(postId));
-        setPost(postData);
-        const commentsData = await postService.getComments(Number(postId));
-        setComments(commentsData.comments);
-      } catch (error) {
-        console.error('Failed to fetch post data:', error);
-      }
-    };
-    fetchPostAndComments();
-  }, [postId]);
+  const {
+    comment,
+    setComment,
+    post,
+    comments,
+    isSigninOpen,
+    setIsSigninOpen,
+    handleSubmitComment,
+  } = usePostPage();
 
   if (!post) {
     return <div>Post not found</div>;
   }
-
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isAuthenticated) {
-      setIsSigninOpen(true);
-      return;
-    }
-    if (!postId) return;
-    try {
-      await postService.createComment(Number(postId), { content: comment });
-      const commentsData = await postService.getComments(Number(postId));
-      setComments(commentsData.comments);
-      setComment("");
-    } catch (error) {
-      console.error('Failed to submit comment:', error);
-    }
-  };
 
   return (
     <>
@@ -83,8 +49,8 @@ export default function Post() {
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Write your reply..."
-              className="w-full h-32 bg-background-dark text-white rounded-lg p-4 
-                       border border-gray-700 focus:border-primary focus:outline-none 
+              className="w-full h-32 bg-background-dark text-white rounded-lg p-4 \
+                       border border-gray-700 focus:border-primary focus:outline-none \
                        transition-colors placeholder-gray-500 resize-none"
             />
           </div>

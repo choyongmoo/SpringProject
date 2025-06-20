@@ -1,25 +1,22 @@
 package ac.yuhan.backend.domain.user.dto;
 
-import java.time.LocalDateTime;
-
 import ac.yuhan.backend.domain.user.User;
-
 import lombok.Data;
-import lombok.AllArgsConstructor;
 
 @Data
-@AllArgsConstructor
 public class UserResponse {
-
+    private Long id;
     private String username;
-
     private String email;
+    private String major;
 
-    private LocalDateTime createdAt;
-
-    public UserResponse(User user) {
-        this.username = user.getUsername();
-        this.email = user.getEmail();
-        this.createdAt = user.getCreatedAt();
+    public static UserResponse from(User user) {
+        UserResponse dto = new UserResponse();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setMajor(user.getMajor());
+        
+        return dto;
     }
 }

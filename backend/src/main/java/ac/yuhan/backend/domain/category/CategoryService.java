@@ -1,55 +1,45 @@
 package ac.yuhan.backend.domain.category;
 
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
-
-import ac.yuhan.backend.domain.category.dto.CategoriesResponse;
-import ac.yuhan.backend.domain.category.dto.CategoryResponse;
-import ac.yuhan.backend.domain.category.dto.CreateCategoryRequest;
-import ac.yuhan.backend.domain.post.dto.PostResponse;
-import ac.yuhan.backend.domain.post.dto.PostsResponse;
-import ac.yuhan.backend.domain.post.repository.PostRepository;
-import jakarta.transaction.Transactional;
 
 @Service
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final PostRepository postRepository;
 
-    public CategoryService(CategoryRepository categoryRepository, PostRepository postRepository) {
+    public CategoryService(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
-        this.postRepository = postRepository;
     }
 
-    public CategoriesResponse getAllCategories() {
-        return new CategoriesResponse(categoryRepository.findAll().stream()
-                .map(CategoryResponse::new)
-                .collect(Collectors.toList()));
-    }
-
-    public CategoryResponse getCategory(String name) {
-        return new CategoryResponse(
-                categoryRepository.findById(name).orElseThrow(() -> new RuntimeException("Category not found")));
-    }
-
-    @Transactional
-    public CategoryResponse createCategory(CreateCategoryRequest request) {
-        if (categoryRepository.existsById(request.getName())) {
-            throw new RuntimeException("Category already exists");
+    public Category createCategory(Category category) {
+        if (categoryRepository.existsByName(category.getName())) {
+            throw new RuntimeException("이미 존재하는 카테고리입니다.");
         }
-
-        Category category = new Category();
-        category.setName(request.getName());
-        category.setDescription(request.getDescription());
-
-        return new CategoryResponse(categoryRepository.save(category));
+        return categoryRepository.save(category);
     }
 
-    public PostsResponse getAllPosts(String name) {
-        return new PostsResponse(postRepository.findByCategoryName(name).stream()
-                .map(PostResponse::new)
-                .collect(Collectors.toList()));
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
+    }
+
+    public Optional<Category> getCategoryById(Long id) {
+        return categoryRepository.findById(id);
+    }
+
+    public Category updateCategory(Long id, Category updatedCategory) {
+        return categoryRepository.findById(id)
+                .map(category -> {
+                    category.setName(updatedCategory.getName());
+                    category.setDescription(updatedCategory.getDescription());
+                    return categoryRepository.save(category);
+                })
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+    }
+
+    public void deleteCategory(Long id) {
+        categoryRepository.deleteById(id);
     }
 }

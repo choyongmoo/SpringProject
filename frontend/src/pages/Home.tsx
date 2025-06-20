@@ -1,39 +1,22 @@
-import { useState, useEffect } from "react";
 import CategoryCard from "../components/home/CategoryCard";
 import SearchBar from "../components/common/SearchBar";
 import Button from "../components/common/Button";
 import AddCategoryModal from "../components/modals/AddCategoryModal";
 import SigninModal from "../components/modals/SigninModal";
-import { useAuth } from "../contexts/AuthContext";
-import { categoryService } from "../services/categoryService";
-import type { CategoryResponse } from "../services/categoryService";
+import { useHomePage } from "../hooks/useHomePage";
 
 export default function Home() {
-  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
-  const [isSigninOpen, setIsSigninOpen] = useState(false);
-  const [categories, setCategories] = useState<CategoryResponse[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const { isAuthenticated } = useAuth();
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const response = await categoryService.getAllCategories();
-      setCategories(response.categories);
-    };
-    fetchCategories();
-  }, []);
-
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleAddCategoryClick = () => {
-    if (!isAuthenticated) {
-      setIsSigninOpen(true);
-      return;
-    }
-    setIsAddCategoryOpen(true);
-  };
+  const {
+    isAddCategoryOpen,
+    setIsAddCategoryOpen,
+    isSigninOpen,
+    setIsSigninOpen,
+    searchQuery,
+    setSearchQuery,
+    filteredCategories,
+    handleAddCategoryClick,
+    refreshCategories,
+  } = useHomePage();
 
   return (
     <>
@@ -74,13 +57,7 @@ export default function Home() {
       <AddCategoryModal
         isOpen={isAddCategoryOpen}
         onClose={() => setIsAddCategoryOpen(false)}
-        onSuccess={() => {
-          const fetchCategories = async () => {
-            const response = await categoryService.getAllCategories();
-            setCategories(response.categories);
-          };
-          fetchCategories();
-        }}
+        onSuccess={refreshCategories}
       />
 
       <SigninModal

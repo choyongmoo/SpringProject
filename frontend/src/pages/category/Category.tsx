@@ -1,56 +1,27 @@
-import { useParams } from "react-router";
-import { useState, useEffect } from "react";
 import PostCard from "../../components/category/PostCard";
 import SearchBar from "../../components/common/SearchBar";
 import Button from "../../components/common/Button";
 import AddPostModal from "../../components/modals/AddPostModal";
 import SigninModal from "../../components/modals/SigninModal";
-import { useAuth } from "../../contexts/AuthContext";
-import { categoryService } from "../../services/categoryService";
-import type { CategoryResponse } from "../../services/categoryService";
-import type { PostResponse } from "../../services/postService";
+import { useCategoryPage } from "../../hooks/useCategoryPage";
 
 export default function Category() {
-  const { categoryName } = useParams();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isAddPostOpen, setIsAddPostOpen] = useState(false);
-  const [isSigninOpen, setIsSigninOpen] = useState(false);
-  const [category, setCategory] = useState<CategoryResponse | null>(null);
-  const [posts, setPosts] = useState<PostResponse[]>([]);
-  const { isAuthenticated } = useAuth();
-
-  useEffect(() => {
-    const fetchCategoryAndPosts = async () => {
-      if (!categoryName) return;
-      try {
-        const categoryData = await categoryService.getCategory(categoryName);
-        setCategory(categoryData);
-        const postsData = await categoryService.getAllPosts(categoryName);
-        setPosts(postsData.posts);
-      } catch (error) {
-        console.error('Failed to fetch category data:', error);
-      }
-    };
-    fetchCategoryAndPosts();
-  }, [categoryName]);
+  const {
+    searchQuery,
+    setSearchQuery,
+    isAddPostOpen,
+    setIsAddPostOpen,
+    isSigninOpen,
+    setIsSigninOpen,
+    category,
+    filteredPosts,
+    handleAddPostClick,
+    refreshPosts,
+  } = useCategoryPage();
 
   if (!category) {
     return <div>Category not found</div>;
   }
-
-  const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.authorName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleAddPostClick = () => {
-    if (!isAuthenticated) {
-      setIsSigninOpen(true);
-      return;
-    }
-    setIsAddPostOpen(true);
-  };
 
   return (
     <>
@@ -94,13 +65,7 @@ export default function Category() {
         isOpen={isAddPostOpen}
         onClose={() => setIsAddPostOpen(false)}
         categoryName={category.name}
-        onSuccess={() => {
-          const fetchPosts = async () => {
-            const postsData = await categoryService.getAllPosts(category.name);
-            setPosts(postsData.posts);
-          };
-          fetchPosts();
-        }}
+        onSuccess={refreshPosts}
       />
 
       <SigninModal

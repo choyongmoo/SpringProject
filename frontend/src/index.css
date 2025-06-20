@@ -12,15 +12,4 @@
   --color-background: oklch(0.21 0.034 264.665);
   --color-background-dark: oklch(0.17 0.028 265.31);
   --color-background-light: oklch(0.25 0.04 263.97);
-
-  --color-accent: oklch(0.696 0.17 162.48);
-  --color-accent-dark: oklch(0.618 0.152 164.85);
-  --color-accent-light: oklch(0.774 0.188 160.11);
-
-  --color-text: #343a40;
-  --color-border: #dee2e6;
-  --color-success: #28a745;
-  --color-danger: #dc3545;
-  --color-warning: #ffc107;
-  --color-info: #17a2b8;
 }
