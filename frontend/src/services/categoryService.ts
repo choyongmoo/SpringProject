@@ -1,38 +1,73 @@
-import api from './api';
-import type { PostsResponse } from './postService';
+import api from "./api";
+import type { CreatePostRequest, PostResponse } from "./postService";
 
-export interface CreateCategoryRequest {
-    name: string;
-    description: string;
-}
-
-export interface CategoryResponse {
-    name: string;
-    description: string;
+export interface Category {
+  name: string;
+  description: string;
 }
 
 export interface CategoriesResponse {
-    categories: CategoryResponse[];
+  categories: CategoryResponse[];
 }
 
-export const categoryService = {
-    getAllCategories: async (): Promise<CategoriesResponse> => {
-        const response = await api.get<CategoriesResponse>('/categories');
-        return response.data;
-    },
+export interface CategoryPostsResponse extends CategoryResponse {
+  posts: PostResponse[];
+}
 
-    getCategory: async (name: string): Promise<CategoryResponse> => {
-        const response = await api.get<CategoryResponse>(`/categories/${name}`);
-        return response.data;
-    },
+export interface CategoryResponse {
+  name: string;
+  description: string;
+}
 
-    createCategory: async (data: CreateCategoryRequest): Promise<CategoryResponse> => {
-        const response = await api.post<CategoryResponse>('/categories', data);
-        return response.data;
-    },
+export interface CreateCategoryRequest {
+  name: string;
+  description: string;
+}
 
-    getAllPosts: async (name: string): Promise<PostsResponse> => {
-        const response = await api.get<PostsResponse>(`/categories/${name}/posts`);
-        return response.data;
-    },
+export interface UpdateCategoryRequest {
+  name: string;
+  description: string;
+}
+
+export const getCategories = async (): Promise<CategoriesResponse> => {
+  const response = await api.get("/category");
+  return response.data;
+};
+
+export const getCategory = async (name: string): Promise<CategoryResponse> => {
+  const response = await api.get(`/category/${name}`);
+  return response.data;
+};
+
+export const createCategory = async (
+  request: CreateCategoryRequest
+): Promise<CategoryResponse> => {
+  const response = await api.post("/category", request);
+  return response.data;
+};
+
+export const updateCategory = async (
+  name: string,
+  request: UpdateCategoryRequest
+): Promise<CategoryResponse> => {
+  const response = await api.put(`/category/${name}`, request);
+  return response.data;
+};
+
+export const deleteCategory = async (name: string): Promise<void> => {
+  await api.delete(`/category/${name}`);
+};
+
+export const getCategoryPosts = async (
+  name: string
+): Promise<CategoryPostsResponse> => {
+  const response = await api.get(`/category/${name}/posts`);
+  return response.data;
+};
+
+export const createPost = async (
+  request: CreatePostRequest
+): Promise<PostResponse> => {
+  const response = await api.post("/posts", request);
+  return response.data;
 };

@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ac.yuhan.backend.domain.comment.dto.CommentResponse;
-import ac.yuhan.backend.domain.comment.dto.CommentsResponse;
 import ac.yuhan.backend.domain.comment.dto.CreateCommentRequest;
 import ac.yuhan.backend.domain.post.PostService;
+import ac.yuhan.backend.domain.post.dto.PostCommentsResponse;
 import ac.yuhan.backend.domain.post.dto.PostResponse;
 import ac.yuhan.backend.domain.post.dto.UpdatePostRequest;
 import ac.yuhan.backend.security.SecurityUserDetails;
@@ -61,8 +61,8 @@ public class PostController {
     }
 
     @GetMapping("/{id}/comments")
-    public ResponseEntity<CommentsResponse> getComments(@PathVariable Long id) {
-        return ResponseEntity.ok(postService.getComments(id));
+    public ResponseEntity<PostCommentsResponse> getPostComments(@PathVariable Long id) {
+        return ResponseEntity.ok(postService.getPostComments(id));
     }
 
     @PostMapping("/{id}/comments")

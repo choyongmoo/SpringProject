@@ -1,39 +1,32 @@
-import api from './api';
+import api from "./api";
+import type { User } from "./userService";
 
-export interface SignupRequest {
-    username: string;
-    password: string;
-    email: string;
+interface SignupRequest {
+  username: string;
+  email: string;
+  password: string;
 }
 
-export interface SigninRequest {
-    username: string;
-    password: string;
+interface SigninRequest {
+  username: string;
+  password: string;
 }
 
-export interface SigninResponse {
-    token: string;
+interface SigninResponse {
+  token: string;
+  user: User;
 }
 
-export interface UserResponse {
-    username: string;
-    email: string;
-    createdAt: string;
-}
+export const signup = async (
+  request: SignupRequest
+): Promise<SigninResponse> => {
+  const response = await api.post("/auth/signup", request);
+  return response.data;
+};
 
-export const authService = {
-    signup: async (data: SignupRequest): Promise<SigninResponse> => {
-        const response = await api.post<SigninResponse>('/auth/signup', data);
-        return response.data;
-    },
-
-    signin: async (data: SigninRequest): Promise<SigninResponse> => {
-        const response = await api.post<SigninResponse>('/auth/signin', data);
-        return response.data;
-    },
-
-    getCurrentUser: async (): Promise<UserResponse> => {
-        const response = await api.get<UserResponse>('/auth/me');
-        return response.data;
-    },
-}; 
+export const signin = async (
+  request: SigninRequest
+): Promise<SigninResponse> => {
+  const response = await api.post("/auth/signin", request);
+  return response.data;
+};

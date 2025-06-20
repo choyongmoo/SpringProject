@@ -37,6 +37,9 @@ public class Post {
     @Column(nullable = false)
     private String content;
 
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
     @ManyToOne
     @JoinColumn(name = "category_name", nullable = false)
     private Category category;
@@ -47,9 +50,6 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
 
     @PrePersist
     void createdAt() {

@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ac.yuhan.backend.domain.category.CategoryService;
 import ac.yuhan.backend.domain.category.dto.CategoriesResponse;
+import ac.yuhan.backend.domain.category.dto.CategoryPostsResponse;
 import ac.yuhan.backend.domain.category.dto.CategoryResponse;
 import ac.yuhan.backend.domain.category.dto.CreateCategoryRequest;
 import ac.yuhan.backend.domain.category.dto.UpdateCategoryRequest;
 import ac.yuhan.backend.domain.post.dto.CreatePostRequest;
 import ac.yuhan.backend.domain.post.dto.PostResponse;
-import ac.yuhan.backend.domain.post.dto.PostsResponse;
 import ac.yuhan.backend.security.SecurityUserDetails;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -80,8 +80,8 @@ public class CategoryController {
     }
 
     @GetMapping("/{name}/posts")
-    public ResponseEntity<PostsResponse> getAllPosts(@PathVariable String name) {
-        return ResponseEntity.ok(categoryService.getAllPosts(name));
+    public ResponseEntity<CategoryPostsResponse> getCategoryPosts(@PathVariable String name) {
+        return ResponseEntity.ok(categoryService.getCategoryPosts(name));
     }
 
     @PostMapping("/{name}/posts")

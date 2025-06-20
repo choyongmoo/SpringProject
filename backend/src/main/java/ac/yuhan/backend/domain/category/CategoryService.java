@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import ac.yuhan.backend.domain.category.dto.CategoriesResponse;
+import ac.yuhan.backend.domain.category.dto.CategoryPostsResponse;
 import ac.yuhan.backend.domain.category.dto.CategoryResponse;
 import ac.yuhan.backend.domain.category.dto.CreateCategoryRequest;
 import ac.yuhan.backend.domain.category.dto.UpdateCategoryRequest;
@@ -12,7 +13,6 @@ import ac.yuhan.backend.domain.post.Post;
 import ac.yuhan.backend.domain.post.PostRepository;
 import ac.yuhan.backend.domain.post.dto.CreatePostRequest;
 import ac.yuhan.backend.domain.post.dto.PostResponse;
-import ac.yuhan.backend.domain.post.dto.PostsResponse;
 import ac.yuhan.backend.domain.user.User;
 import jakarta.transaction.Transactional;
 
@@ -73,10 +73,10 @@ public class CategoryService {
         return new CategoryResponse(categoryRepository.save(category));
     }
 
-    public PostsResponse getAllPosts(String name) {
-        return new PostsResponse(postRepository.findByCategoryName(name).stream()
-                .map(PostResponse::new)
-                .collect(Collectors.toList()));
+    public CategoryPostsResponse getCategoryPosts(String name) {
+        Category category = categoryRepository.findById(name)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        return new CategoryPostsResponse(category, postRepository.findByCategoryName(name));
     }
 
     @Transactional

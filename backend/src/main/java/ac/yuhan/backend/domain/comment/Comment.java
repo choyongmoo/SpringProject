@@ -28,6 +28,9 @@ public class Comment {
     @Column(nullable = false)
     private String content;
 
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
@@ -35,9 +38,6 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "author_username", nullable = false)
     private User author;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
 
     @PrePersist
     void createdAt() {

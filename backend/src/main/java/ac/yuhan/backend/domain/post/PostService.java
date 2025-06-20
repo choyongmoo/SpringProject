@@ -1,16 +1,13 @@
 package ac.yuhan.backend.domain.post;
 
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
 
 import ac.yuhan.backend.domain.comment.Comment;
 import ac.yuhan.backend.domain.comment.CommentRepository;
 import ac.yuhan.backend.domain.comment.dto.CommentResponse;
-import ac.yuhan.backend.domain.comment.dto.CommentsResponse;
 import ac.yuhan.backend.domain.comment.dto.CreateCommentRequest;
+import ac.yuhan.backend.domain.post.dto.PostCommentsResponse;
 import ac.yuhan.backend.domain.post.dto.PostResponse;
-import ac.yuhan.backend.domain.post.dto.PostsResponse;
 import ac.yuhan.backend.domain.post.dto.UpdatePostRequest;
 import ac.yuhan.backend.domain.user.User;
 import jakarta.transaction.Transactional;
@@ -24,12 +21,6 @@ public class PostService {
     public PostService(PostRepository postRepository, CommentRepository commentRepository) {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
-    }
-
-    public PostsResponse getAllPosts() {
-        return new PostsResponse(postRepository.findAll().stream()
-                .map(PostResponse::new)
-                .collect(Collectors.toList()));
     }
 
     public PostResponse getPost(Long id) {
@@ -59,10 +50,10 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
-    public CommentsResponse getComments(Long id) {
-        return new CommentsResponse(commentRepository.findByPostId(id).stream()
-                .map(CommentResponse::new)
-                .collect(Collectors.toList()));
+    public PostCommentsResponse getPostComments(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        return new PostCommentsResponse(post, commentRepository.findByPostId(id));
     }
 
     @Transactional

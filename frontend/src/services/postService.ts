@@ -1,60 +1,65 @@
-import api from './api';
+import api from "./api";
+import type { CommentResponse, CreateCommentRequest } from "./commentService";
 
-export interface CreatePostRequest {
-    title: string;
-    content: string;
-    categoryName: string;
+export interface Post {
+  id: number;
+  title: string;
+  content: string;
+  authorName: string;
+  createdAt: Date;
 }
 
-export interface CreateCommentRequest {
-    content: string;
+export interface CreatePostRequest {
+  title: string;
+  content: string;
+  categoryName: string;
+}
+
+export interface PostCommentsResponse extends PostResponse {
+  comments: CommentResponse[];
 }
 
 export interface PostResponse {
-    id: number;
-    title: string;
-    content: string;
-    authorName: string;
-    createdAt: string;
+  id: number;
+  title: string;
+  content: string;
+  authorName: string;
+  createdAt: Date;
 }
 
-export interface CommentResponse {
-    id: number;
-    content: string;
-    authorName: string;
-    createdAt: string;
+export interface UpdatePostRequest {
+  title: string;
+  content: string;
 }
 
-export interface PostsResponse {
-    posts: PostResponse[];
-}
+export const getPost = async (id: number): Promise<PostResponse> => {
+  const response = await api.get(`/post/${id}`);
+  return response.data;
+};
 
-export interface CommentsResponse {
-    comments: CommentResponse[];
-}
+export const updatePost = async (
+  id: number,
+  request: UpdatePostRequest
+): Promise<PostResponse> => {
+  const response = await api.put(`/post/${id}`, request);
+  return response.data;
+};
 
-export const postService = {
-    getAllPosts: async (): Promise<PostsResponse> => {
-        const response = await api.get<PostsResponse>('/posts');
-        return response.data;
-    },
+export const deletePost = async (id: number): Promise<void> => {
+  await api.delete(`/post/${id}`);
+};
 
-    getPost: async (id: number): Promise<PostResponse> => {
-        const response = await api.get<PostResponse>(`/posts/${id}`);
-        return response.data;
-    },
+export const getPostComments = async (
+  id: number
+): Promise<PostCommentsResponse> => {
+  const response = await api.get(`/post/${id}/comments`);
+  return response.data;
+};
 
-    createPost: async (data: CreatePostRequest): Promise<PostResponse> => {
-        const response = await api.post<PostResponse>('/posts', data);
-        return response.data;
-    },
-
-    getComments: async (id: number): Promise<CommentsResponse> => {
-        const response = await api.get<CommentsResponse>(`/posts/${id}/comments`);
-        return response.data;
-    },
-
-    createComment: async (postId: number, data: CreateCommentRequest): Promise<void> => {
-        await api.post(`/posts/${postId}/comments`, data);
-    },
-}; 
+export const createComment = async (
+  id: number,
+  request: CreateCommentRequest
+): Promise<CommentResponse> => {
+  const response = await api.post(`/post/${id}/comments`, request);
+  return response.data;
+};

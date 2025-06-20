@@ -3,9 +3,8 @@ package ac.yuhan.backend.domain.user.dto;
 import java.time.LocalDateTime;
 
 import ac.yuhan.backend.domain.user.User;
-
-import lombok.Data;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @Data
 @AllArgsConstructor
@@ -15,11 +14,14 @@ public class UserResponse {
 
     private String email;
 
+    private String profileImageUrl;
+
     private LocalDateTime createdAt;
 
     public UserResponse(User user) {
         this.username = user.getUsername();
         this.email = user.getEmail();
+        this.profileImageUrl = user.getProfileImageUrl();
         this.createdAt = user.getCreatedAt();
     }
 }

@@ -1,10 +1,10 @@
-import { Route, Routes } from 'react-router'
-import MainLayout from './layouts/MainLayout';
-import Home from './pages/Home';
-import NotFound from './pages/NotFound';
-import CategoryLayout from './layouts/CategoryLayout';
-import Category from './pages/category/Category';
-import Post from './pages/category/Post';
+import { Route, Routes } from "react-router";
+import CategoryLayout from "./layouts/CategoryLayout";
+import MainLayout from "./layouts/MainLayout";
+import Category from "./pages/category/Category";
+import Post from "./pages/category/Post";
+import Home from "./pages/Home";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
@@ -20,5 +20,5 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
-  )
+  );
 }
