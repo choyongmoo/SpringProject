@@ -1,18 +1,33 @@
 package ac.yuhan.backend.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.net.URI;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import ac.yuhan.backend.domain.post.Post;
+import ac.yuhan.backend.domain.comment.dto.CommentResponse;
+import ac.yuhan.backend.domain.comment.dto.CommentsResponse;
+import ac.yuhan.backend.domain.comment.dto.CreateCommentRequest;
 import ac.yuhan.backend.domain.post.PostService;
-import ac.yuhan.backend.domain.post.dto.PostRequest;
 import ac.yuhan.backend.domain.post.dto.PostResponse;
+import ac.yuhan.backend.domain.post.dto.UpdatePostRequest;
+import ac.yuhan.backend.security.SecurityUserDetails;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api/post")
+@Tag(name = "Post")
 public class PostController {
 
     private final PostService postService;
@@ -21,56 +36,43 @@ public class PostController {
         this.postService = postService;
     }
 
-    //새 게시글 생성
-    @PostMapping
-    public ResponseEntity<PostResponse> createPost(@RequestBody PostRequest request) {
-        Post post = toEntity(request);
-        Post created = postService.createPost(post, request.getCategoryId(), request.getAuthorId());
-        return ResponseEntity.ok(new PostResponse(created));
-    }
-
-    //모든 게시글 목록 조회
-    @GetMapping
-    public ResponseEntity<List<PostResponse>> getAllPosts() {
-        List<PostResponse> responses = postService.getAllPosts()
-            .stream()
-            .map(PostResponse::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(responses);
-    }
-
-    //특정 게시글 상세 조회
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
-        return postService.getPostById(id)
-            .map(PostResponse::new)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<PostResponse> getPost(@PathVariable Long id) {
+        return ResponseEntity.ok(postService.getPost(id));
     }
 
-    //특정 게시글 수정
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @RequestBody PostRequest request) {
-        Post post = toEntity(request);
-        try {
-            Post updated = postService.updatePost(id, post, request.getCategoryId());
-            return ResponseEntity.ok(new PostResponse(updated));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<PostResponse> updatePost(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdatePostRequest request,
+            @AuthenticationPrincipal SecurityUserDetails userDetails) {
+        return ResponseEntity.ok(postService.updatePost(id, request, userDetails.getUser()));
     }
 
-    //특정 게시글 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<Void> deletePost(@PathVariable Long id,
+            @AuthenticationPrincipal SecurityUserDetails userDetails) {
+        postService.deletePost(id, userDetails.getUser());
         return ResponseEntity.noContent().build();
     }
 
-    private Post toEntity(PostRequest request) {
-        Post post = new Post();
-        post.setTitle(request.getTitle());
-        post.setContent(request.getContent());
-        return post;
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<CommentsResponse> getComments(@PathVariable Long id) {
+        return ResponseEntity.ok(postService.getComments(id));
+    }
+
+    @PostMapping("/{id}/comments")
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<CommentResponse> createComment(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateCommentRequest request,
+            @AuthenticationPrincipal SecurityUserDetails userDetails) {
+        CommentResponse comment = postService.createComment(id, request, userDetails.getUser());
+        return ResponseEntity.created(URI.create("/api/comments/" + comment.getId())).body(comment);
     }
 }

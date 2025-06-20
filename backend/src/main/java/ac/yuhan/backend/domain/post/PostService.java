@@ -1,63 +1,77 @@
 package ac.yuhan.backend.domain.post;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import ac.yuhan.backend.domain.category.Category;
-import ac.yuhan.backend.domain.category.CategoryRepository;
+import ac.yuhan.backend.domain.comment.Comment;
+import ac.yuhan.backend.domain.comment.CommentRepository;
+import ac.yuhan.backend.domain.comment.dto.CommentResponse;
+import ac.yuhan.backend.domain.comment.dto.CommentsResponse;
+import ac.yuhan.backend.domain.comment.dto.CreateCommentRequest;
+import ac.yuhan.backend.domain.post.dto.PostResponse;
+import ac.yuhan.backend.domain.post.dto.PostsResponse;
+import ac.yuhan.backend.domain.post.dto.UpdatePostRequest;
 import ac.yuhan.backend.domain.user.User;
-import ac.yuhan.backend.domain.user.UserRepository;
+import jakarta.transaction.Transactional;
 
 @Service
 public class PostService {
 
     private final PostRepository postRepository;
-    private final CategoryRepository categoryRepository;
-    private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
 
-    public PostService(PostRepository postRepository, CategoryRepository categoryRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository, CommentRepository commentRepository) {
         this.postRepository = postRepository;
-        this.categoryRepository = categoryRepository;
-        this.userRepository = userRepository;
+        this.commentRepository = commentRepository;
     }
 
-    public Post createPost(Post post, Long categoryId, Long authorId) {
-        Category category = categoryRepository.findById(categoryId)
-            .orElseThrow(() -> new RuntimeException("Category not found"));
-
-        User author = userRepository.findById(authorId)
-            .orElseThrow(() -> new RuntimeException("Author not found"));
-
-        post.setCategory(category);
-        post.setAuthor(author);
-
-        return postRepository.save(post);
+    public PostsResponse getAllPosts() {
+        return new PostsResponse(postRepository.findAll().stream()
+                .map(PostResponse::new)
+                .collect(Collectors.toList()));
     }
 
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
+    public PostResponse getPost(Long id) {
+        return new PostResponse(postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found")));
     }
 
-    public Optional<Post> getPostById(Long id) {
-        return postRepository.findById(id);
+    @Transactional
+    public PostResponse updatePost(Long id, UpdatePostRequest request, User author) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        if (!post.getAuthor().equals(author)) {
+            throw new RuntimeException("You are not the author of this post");
+        }
+        post.setTitle(request.getTitle());
+        post.setContent(request.getContent());
+        return new PostResponse(postRepository.save(post));
     }
 
-    public Post updatePost(Long id, Post updatedPost, Long categoryId) {
-        Category category = categoryRepository.findById(categoryId)
-            .orElseThrow(() -> new RuntimeException("Category not found"));
-
-        return postRepository.findById(id)
-            .map(post -> {
-                post.setTitle(updatedPost.getTitle());
-                post.setContent(updatedPost.getContent());
-                post.setCategory(category);
-                return postRepository.save(post);
-            }).orElseThrow(() -> new RuntimeException("Post not found"));
-    }
-
-    public void deletePost(Long id) {
+    @Transactional
+    public void deletePost(Long id, User author) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        if (!post.getAuthor().equals(author)) {
+            throw new RuntimeException("You are not the author of this post");
+        }
         postRepository.deleteById(id);
+    }
+
+    public CommentsResponse getComments(Long id) {
+        return new CommentsResponse(commentRepository.findByPostId(id).stream()
+                .map(CommentResponse::new)
+                .collect(Collectors.toList()));
+    }
+
+    @Transactional
+    public CommentResponse createComment(Long id, CreateCommentRequest request, User author) {
+        Comment comment = new Comment();
+        comment.setContent(request.getContent());
+        comment.setPost(postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found")));
+        comment.setAuthor(author);
+        return new CommentResponse(commentRepository.save(comment));
     }
 }

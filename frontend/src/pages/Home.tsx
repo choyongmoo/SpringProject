@@ -1,22 +1,39 @@
+import { useState, useEffect } from "react";
 import CategoryCard from "../components/home/CategoryCard";
 import SearchBar from "../components/common/SearchBar";
 import Button from "../components/common/Button";
 import AddCategoryModal from "../components/modals/AddCategoryModal";
 import SigninModal from "../components/modals/SigninModal";
-import { useHomePage } from "../hooks/useHomePage";
+import { useAuth } from "../contexts/AuthContext";
+import { categoryService } from "../services/categoryService";
+import type { CategoryResponse } from "../services/categoryService";
 
 export default function Home() {
-  const {
-    isAddCategoryOpen,
-    setIsAddCategoryOpen,
-    isSigninOpen,
-    setIsSigninOpen,
-    searchQuery,
-    setSearchQuery,
-    filteredCategories,
-    handleAddCategoryClick,
-    refreshCategories,
-  } = useHomePage();
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+  const [isSigninOpen, setIsSigninOpen] = useState(false);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const response = await categoryService.getAllCategories();
+      setCategories(response.categories);
+    };
+    fetchCategories();
+  }, []);
+
+  const filteredCategories = categories.filter(category =>
+    category.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleAddCategoryClick = () => {
+    if (!isAuthenticated) {
+      setIsSigninOpen(true);
+      return;
+    }
+    setIsAddCategoryOpen(true);
+  };
 
   return (
     <>
@@ -57,7 +74,13 @@ export default function Home() {
       <AddCategoryModal
         isOpen={isAddCategoryOpen}
         onClose={() => setIsAddCategoryOpen(false)}
-        onSuccess={refreshCategories}
+        onSuccess={() => {
+          const fetchCategories = async () => {
+            const response = await categoryService.getAllCategories();
+            setCategories(response.categories);
+          };
+          fetchCategories();
+        }}
       />
 
       <SigninModal

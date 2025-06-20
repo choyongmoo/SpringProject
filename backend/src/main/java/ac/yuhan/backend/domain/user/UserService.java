@@ -1,8 +1,16 @@
 package ac.yuhan.backend.domain.user;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
+
+import ac.yuhan.backend.domain.user.dto.UpdateUserRequest;
+import ac.yuhan.backend.domain.user.dto.UserResponse;
 
 @Service
 public class UserService {
@@ -13,50 +21,53 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public UserResponse getUser(String name) {
+        User user = userRepository.findById(name)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return new UserResponse(user);
     }
 
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public UserResponse updateUser(String name, User user, UpdateUserRequest request, MultipartFile profileImage) {
+        if (!user.getUsername().equals(name)) {
+            throw new RuntimeException("You are not the owner of this account");
+        }
+        if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+        user.setEmail(request.getEmail());
+        if (profileImage != null && !profileImage.isEmpty()) {
+            uploadProfileImage(user, profileImage);
+        }
+        return new UserResponse(userRepository.save(user));
     }
 
-    public Optional<User> getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public void deleteUser(String name, User user) {
+        if (!user.getUsername().equals(name)) {
+            throw new RuntimeException("You are not the owner of this account");
+        }
+        userRepository.delete(user);
     }
 
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
+    public void uploadProfileImage(User user, MultipartFile profileImage) {
+        try {
+            String userDir = "uploads/" + user.getUsername();
+            Files.createDirectories(Paths.get(userDir));
 
-    public User updateUser(Long id, User updatedUser) {
-        return userRepository.findById(id)
-            .map(user -> {
-                user.setUsername(updatedUser.getUsername());
-                user.setEmail(updatedUser.getEmail());
-                user.setMajor(updatedUser.getMajor());
-                return userRepository.save(user);
-            }).orElseThrow(() -> new RuntimeException("User not found"));
-    }
+            String fileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
+            Path targetPath = Paths.get(userDir, fileName);
+            profileImage.transferTo(targetPath.toFile());
 
-    public User updateUserByUsername(String username, User updatedUser) {
-        return userRepository.findByUsername(username)
-            .map(user -> {
-                user.setEmail(updatedUser.getEmail());
-                user.setMajor(updatedUser.getMajor());
-                return userRepository.save(user);
-            }).orElseThrow(() -> new RuntimeException("User not found"));
-    }
+            if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isEmpty()) {
+                Path oldPath = Paths.get(user.getProfileImageUrl().replace("/uploads/", "uploads/"));
+                if (Files.exists(oldPath)) {
+                    Files.delete(oldPath);
+                }
+            }
 
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
-    }
-
-    public void deleteUserByUsername(String username) {
-        userRepository.findByUsername(username)
-            .ifPresentOrElse(
-                user -> userRepository.deleteById(user.getId()),
-                () -> { throw new RuntimeException("User not found"); }
-            );
+            String imagePath = "/uploads/" + user.getUsername() + "/" + fileName;
+            user.setProfileImageUrl(imagePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save profile image");
+        }
     }
 }

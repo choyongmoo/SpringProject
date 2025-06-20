@@ -1,19 +1,27 @@
 package ac.yuhan.backend.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import ac.yuhan.backend.domain.comment.CommentService;
-import ac.yuhan.backend.domain.comment.dto.CommentRequest;
 import ac.yuhan.backend.domain.comment.dto.CommentResponse;
-import ac.yuhan.backend.security.CustomUserDetails;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import ac.yuhan.backend.domain.comment.dto.UpdateCommentRequest;
+import ac.yuhan.backend.security.SecurityUserDetails;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/api/comment")
+@Tag(name = "Comment")
 public class CommentController {
 
     private final CommentService commentService;
@@ -22,41 +30,28 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    //댓글 생성
-    @PostMapping
-    public ResponseEntity<CommentResponse> create(@RequestBody CommentRequest request) {
-        return ResponseEntity.ok(new CommentResponse(commentService.createComment(request)));
+    @GetMapping("/{id}")
+    public ResponseEntity<CommentResponse> getComment(@PathVariable Long id) {
+        return ResponseEntity.ok(commentService.getComment(id));
     }
 
-    //댓글 조회
-    @GetMapping("/post/{postId}")
-    public ResponseEntity<List<CommentResponse>> getByPost(@PathVariable Long postId) {
-        return ResponseEntity.ok(
-            commentService.getCommentsByPostId(postId)
-                .stream()
-                .map(CommentResponse::new)
-                .collect(Collectors.toList())
-        );
-    }
-
-    //댓글 삭제
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        commentService.deleteComment(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // 댓글 수정
     @PutMapping("/{id}")
-    public ResponseEntity<CommentResponse> update(
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<CommentResponse> updateComment(
             @PathVariable Long id,
-            @RequestBody CommentRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        
-        Long userId = userDetails.getUserId();
+            @Valid @RequestBody UpdateCommentRequest request,
+            @AuthenticationPrincipal SecurityUserDetails userDetails) {
+        return ResponseEntity.ok(commentService.updateComment(id, request, userDetails.getUser()));
+    }
 
-        return ResponseEntity.ok(
-            new CommentResponse(commentService.updateComment(id, request, userId))
-        );
+    @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long id,
+            @AuthenticationPrincipal SecurityUserDetails userDetails) {
+        commentService.deleteComment(id, userDetails.getUser());
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,74 +1,59 @@
 package ac.yuhan.backend.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import ac.yuhan.backend.domain.user.User;
 import ac.yuhan.backend.domain.user.UserService;
 import ac.yuhan.backend.domain.user.dto.UpdateUserRequest;
 import ac.yuhan.backend.domain.user.dto.UserResponse;
-import ac.yuhan.backend.security.JwtTokenProvider;
-
-import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+import ac.yuhan.backend.security.SecurityUserDetails;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
+@Tag(name = "User")
 public class UserController {
 
     private final UserService userService;
-    private final JwtTokenProvider jwtTokenProvider;
 
-    public UserController(UserService userService, JwtTokenProvider jwtTokenProvider) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    // 내 정보 조회
-    @GetMapping("/me")
-    public ResponseEntity<UserResponse> getMyInfo(HttpServletRequest request) {
-        String token = jwtTokenProvider.resolveToken(request);
-        if (token == null || !jwtTokenProvider.validateToken(token)) {
-            return ResponseEntity.status(401).build();
-        }
-
-        String username = jwtTokenProvider.getAuthentication(token).getName();
-
-        return userService.getUserByUsername(username)
-                .map(user -> ResponseEntity.ok(UserResponse.from(user)))
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/{name}")
+    public ResponseEntity<UserResponse> getUser(@PathVariable String name) {
+        return ResponseEntity.ok(userService.getUser(name));
     }
 
-    // 내 정보 수정
-    @PutMapping("/me")
-    public ResponseEntity<UserResponse> updateMyInfo(HttpServletRequest request, @RequestBody UpdateUserRequest updateRequest) {
-        String token = jwtTokenProvider.resolveToken(request);
-        if (token == null || !jwtTokenProvider.validateToken(token)) {
-            return ResponseEntity.status(401).build();
-        }
-
-        String username = jwtTokenProvider.getAuthentication(token).getName();
-
-        User updatedUser = userService.updateUserByUsername(username, updateRequest.toEntity());
-        return ResponseEntity.ok(UserResponse.from(updatedUser));
+    @PutMapping(value = "/{name}", consumes = "multipart/form-data")
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable String name,
+            @AuthenticationPrincipal SecurityUserDetails userDetails,
+            @RequestPart("data") @Valid UpdateUserRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile profileImage) {
+        return ResponseEntity.ok(userService.updateUser(name, userDetails.getUser(), request, profileImage));
     }
 
-    // 내 계정 삭제
-    @DeleteMapping("/me")
-    public ResponseEntity<Void> deleteMyAccount(HttpServletRequest request) {
-        String token = jwtTokenProvider.resolveToken(request);
-        if (token == null || !jwtTokenProvider.validateToken(token)) {
-            return ResponseEntity.status(401).build();
-        }
-
-        String username = jwtTokenProvider.getAuthentication(token).getName();
-        userService.deleteUserByUsername(username);
-
+    @DeleteMapping("/{name}")
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable String name,
+            @AuthenticationPrincipal SecurityUserDetails userDetails) {
+        userService.deleteUser(name, userDetails.getUser());
         return ResponseEntity.noContent().build();
     }
 }

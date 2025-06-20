@@ -1,19 +1,30 @@
 package ac.yuhan.backend.domain.post.dto;
 
+import java.time.LocalDateTime;
+
 import ac.yuhan.backend.domain.post.Post;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class PostResponse {
+
     private Long id;
+
     private String title;
+
     private String content;
-    private String categoryName;
+
+    private String authorName;
+
+    private LocalDateTime createdAt;
 
     public PostResponse(Post post) {
         this.id = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
-        this.categoryName = post.getCategory() != null ? post.getCategory().getName() : null;
+        this.authorName = post.getAuthor().getUsername();
+        this.createdAt = post.getCreatedAt();
     }
 }

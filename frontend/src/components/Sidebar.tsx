@@ -1,20 +1,15 @@
+import { useState } from "react";
 import Brand from "./common/Brand";
 import Button from "./common/Button";
 import Intro from "./common/Intro";
 import SignInModal from "./modals/SigninModal";
 import SignUpModal from "./modals/SignupModal";
-import { useSidebar } from "../hooks/useSidebar";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Sidebar() {
-  const {
-    isSignInOpen,
-    setIsSignInOpen,
-    isSignUpOpen,
-    setIsSignUpOpen,
-    user,
-    isAuthenticated,
-    signout,
-  } = useSidebar();
+  const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const { user, isAuthenticated, signout } = useAuth();
 
   return (
     <>
