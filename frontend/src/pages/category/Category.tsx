@@ -108,16 +108,18 @@ export const Category: React.FC = () => {
       </div>
 
       {showCreateForm && (
-        <PostForm
-          title={formData.title}
-          content={formData.content}
-          onTitleChange={handleTitleChange}
-          onContentChange={handleContentChange}
-          onSubmit={handleSubmit}
-          onCancel={() => setShowCreateForm(false)}
-          submitting={submitting}
-          submitText="게시글 작성"
-        />
+        <Card className="mb-4">
+          <PostForm
+            title={formData.title}
+            content={formData.content}
+            onTitleChange={handleTitleChange}
+            onContentChange={handleContentChange}
+            onSubmit={handleSubmit}
+            onCancel={() => setShowCreateForm(false)}
+            submitting={submitting}
+            submitText="게시글 작성"
+          />
+        </Card>
       )}
 
       <div className="space-y-4">
