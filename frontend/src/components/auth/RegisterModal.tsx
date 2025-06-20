@@ -28,7 +28,7 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      setPasswordError("Passwords do not match");
+      setPasswordError("비밀번호가 일치하지 않습니다");
       return;
     }
 
@@ -69,48 +69,48 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create Account" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title="회원가입" size="md">
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input
-          label="Username"
+          label="사용자명"
           name="username"
           type="text"
           value={formData.username}
           onChange={handleChange}
           required
           autoFocus
-          placeholder="Choose a username"
+          placeholder="사용자명을 선택하세요"
         />
 
         <Input
-          label="Email"
+          label="이메일"
           name="email"
           type="email"
           value={formData.email}
           onChange={handleChange}
           required
-          placeholder="Enter your email"
+          placeholder="이메일을 입력하세요"
         />
 
         <Input
-          label="Password"
+          label="비밀번호"
           name="password"
           type="password"
           value={formData.password}
           onChange={handleChange}
           required
-          placeholder="Create a password"
+          placeholder="비밀번호를 생성하세요"
         />
 
         <Input
-          label="Confirm Password"
+          label="비밀번호 확인"
           name="confirmPassword"
           type="password"
           value={formData.confirmPassword}
           onChange={handleChange}
           error={passwordError}
           required
-          placeholder="Confirm your password"
+          placeholder="비밀번호를 확인하세요"
         />
 
         {(error || passwordError) && (
@@ -120,19 +120,19 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
         )}
 
         <Button type="submit" className="w-full" loading={loading}>
-          Create Account
+          계정 만들기
         </Button>
       </form>
 
       <div className="text-center mt-6 pt-4 border-t border-border-color">
         <p className="text-text-secondary text-sm">
-          Already have an account?{" "}
+          이미 계정이 있으신가요?{" "}
           <button
             type="button"
             onClick={handleSwitchToLogin}
             className="text-accent-primary hover:text-accent-secondary transition-colors font-medium"
           >
-            Sign in
+            로그인
           </button>
         </p>
       </div>

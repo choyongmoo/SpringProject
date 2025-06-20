@@ -52,6 +52,8 @@ export const Category: React.FC = () => {
   };
 
   const handleDeletePost = async (postId: number) => {
+    if (!confirm("이 게시글을 삭제하시겠습니까?")) return;
+
     setDeletingPostId(postId);
     try {
       await deletePost(postId);
@@ -94,40 +96,43 @@ export const Category: React.FC = () => {
   return (
     <div className="container py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text-primary mb-2">
-          {kebabToTitleCase(category.name)}
-        </h1>
-        <p className="text-text-secondary mb-4">{category.description}</p>
-
-        {isAuthenticated && (
-          <Button
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            variant="primary"
-          >
-            {showCreateForm ? "Cancel" : "Create New Post"}
-          </Button>
-        )}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-text-primary mb-2">
+              {kebabToTitleCase(category.name)}
+            </h1>
+            <p className="text-text-secondary mb-4">{category.description}</p>
+          </div>
+          {isAuthenticated && (
+            <Button
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              variant="primary"
+            >
+              {showCreateForm ? "취소" : "새 게시글 작성"}
+            </Button>
+          )}
+        </div>
       </div>
 
       {showCreateForm && (
         <Card className="mb-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Title"
+              label="제목"
               name="title"
               value={formData.title}
               onChange={handleChange}
               required
-              placeholder="Enter post title"
+              placeholder="게시글 제목을 입력하세요"
             />
 
             <Textarea
-              label="Content"
+              label="내용"
               name="content"
               value={formData.content}
               onChange={handleChange}
               required
-              placeholder="Write your post content..."
+              placeholder="게시글 내용을 작성하세요..."
             />
 
             <div className="flex gap-3">
@@ -136,14 +141,14 @@ export const Category: React.FC = () => {
                 loading={submitting}
                 disabled={!formData.title || !formData.content}
               >
-                Create Post
+                게시글 작성
               </Button>
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => setShowCreateForm(false)}
               >
-                Cancel
+                취소
               </Button>
             </div>
           </form>
@@ -154,14 +159,11 @@ export const Category: React.FC = () => {
         {categoryPosts?.posts?.map((post) => (
           <Card key={post.id} className="hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
-              <Link
-                to={`/category/${categoryName}/${post.id}`}
-                className="flex-1"
-              >
+              <Link to={`/category/${categoryName}/${post.id}`} className="flex-1">
                 <div className="card-header">
                   <h3 className="card-title text-lg">{post.title}</h3>
                   <div className="flex items-center gap-4 text-sm text-text-secondary">
-                    <span>By {post.authorName}</span>
+                    <span>작성자: {post.authorName}</span>
                     <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
@@ -182,7 +184,7 @@ export const Category: React.FC = () => {
                   loading={deletingPostId === post.id}
                   className="ml-4 flex-shrink-0"
                 >
-                  Delete
+                  삭제
                 </Button>
               )}
             </div>
@@ -193,12 +195,12 @@ export const Category: React.FC = () => {
       {categoryPosts?.posts?.length === 0 && (
         <div className="text-center py-12">
           <h3 className="text-xl font-semibold text-text-primary mb-2">
-            No Posts
+            게시글이 없습니다
           </h3>
           <p className="text-text-secondary">
             {isAuthenticated
-              ? "Be the first to create a post in this category!"
-              : "No posts available in this category."}
+              ? "이 카테고리의 첫 번째 게시글을 작성해보세요!"
+              : "이 카테고리에 게시글이 없습니다."}
           </p>
         </div>
       )}

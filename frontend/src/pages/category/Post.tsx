@@ -48,6 +48,8 @@ export const Post: React.FC = () => {
   };
 
   const handleDeleteComment = async (commentId: number) => {
+    if (!confirm("이 댓글을 삭제하시겠습니까?")) return;
+
     setDeletingCommentId(commentId);
     try {
       await deleteComment(commentId);
@@ -60,6 +62,8 @@ export const Post: React.FC = () => {
   };
 
   const handleDeletePost = async () => {
+    if (!postId || !confirm("이 게시글을 삭제하시겠습니까?")) return;
+
     setDeletingPost(true);
     try {
       await deletePost(Number(postId));
@@ -72,7 +76,7 @@ export const Post: React.FC = () => {
   };
 
   if (postLoading || commentsLoading) {
-    return <Loading text="Loading post..." />;
+    return <Loading text="게시글을 불러오는 중..." />;
   }
 
   if (!post) {
@@ -80,10 +84,10 @@ export const Post: React.FC = () => {
       <div className="container py-8">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-text-primary mb-2">
-            Post Not Found
+            게시글을 찾을 수 없습니다
           </h2>
           <p className="text-text-secondary">
-            The post you're looking for doesn't exist.
+            요청하신 게시글이 존재하지 않습니다.
           </p>
         </div>
       </div>
@@ -97,7 +101,7 @@ export const Post: React.FC = () => {
           to={`/category/${post.categoryName}`}
           className="text-accent-primary hover:text-accent-secondary transition-colors mb-4 inline-block"
         >
-          ← Back to Category
+          ← 카테고리로 돌아가기
         </Link>
       </div>
 
@@ -107,7 +111,7 @@ export const Post: React.FC = () => {
             <div className="flex-1">
               <h1 className="card-title text-2xl">{post.title}</h1>
               <div className="flex items-center gap-4 text-sm text-text-secondary">
-                <span>By {post.authorName}</span>
+                <span>작성자: {post.authorName}</span>
                 <span>{new Date(post.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
@@ -119,7 +123,7 @@ export const Post: React.FC = () => {
                 loading={deletingPost}
                 className="ml-4 flex-shrink-0"
               >
-                Delete Post
+                게시글 삭제
               </Button>
             )}
           </div>
@@ -134,7 +138,7 @@ export const Post: React.FC = () => {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-text-primary">
-            Comments ({postComments?.comments?.length || 0})
+            댓글 ({postComments?.comments?.length || 0})
           </h2>
           {isAuthenticated && (
             <Button
@@ -142,7 +146,7 @@ export const Post: React.FC = () => {
               variant="primary"
               size="sm"
             >
-              {showCommentForm ? "Cancel" : "Add Comment"}
+              {showCommentForm ? "취소" : "댓글 작성"}
             </Button>
           )}
         </div>
@@ -152,11 +156,11 @@ export const Post: React.FC = () => {
         <Card className="mb-6">
           <form onSubmit={handleSubmitComment} className="space-y-4">
             <Textarea
-              label="Your Comment"
+              label="댓글 내용"
               value={commentContent}
               onChange={(e) => setCommentContent(e.target.value)}
               required
-              placeholder="Write your comment..."
+              placeholder="댓글을 작성하세요..."
             />
 
             <div className="flex gap-3">
@@ -165,14 +169,14 @@ export const Post: React.FC = () => {
                 loading={submitting}
                 disabled={!commentContent.trim()}
               >
-                Post Comment
+                댓글 작성
               </Button>
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => setShowCommentForm(false)}
               >
-                Cancel
+                취소
               </Button>
             </div>
           </form>
@@ -203,7 +207,7 @@ export const Post: React.FC = () => {
                       onClick={() => handleDeleteComment(comment.id)}
                       loading={deletingCommentId === comment.id}
                     >
-                      Delete
+                      삭제
                     </Button>
                   )}
                 </div>
@@ -219,12 +223,12 @@ export const Post: React.FC = () => {
       {postComments?.comments?.length === 0 && (
         <div className="text-center py-8">
           <h3 className="text-lg font-semibold text-text-primary mb-2">
-            No Comments
+            댓글이 없습니다
           </h3>
           <p className="text-text-secondary">
             {isAuthenticated
-              ? "Be the first to comment on this post!"
-              : "No comments yet. Sign in to add a comment."}
+              ? "이 게시글의 첫 번째 댓글을 작성해보세요!"
+              : "아직 댓글이 없습니다. 로그인하여 댓글을 작성하세요."}
           </p>
         </div>
       )}

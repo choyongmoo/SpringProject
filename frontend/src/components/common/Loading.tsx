@@ -6,7 +6,7 @@ interface LoadingProps {
 }
 
 export const Loading: React.FC<LoadingProps> = ({
-  text = "Loading...",
+  text = "로딩 중...",
   size = "md",
 }) => {
   const sizeClasses = {

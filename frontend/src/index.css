@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
-@theme {
-}
+@theme {}
 
 :root {
   --bg-primary: #0f0f23;
@@ -285,11 +284,11 @@ body {
 }
 
 /* Spacing utilities */
-.space-y-4 > * + * {
+.space-y-4>*+* {
   margin-top: 1rem;
 }
 
-.space-y-5 > * + * {
+.space-y-5>*+* {
   margin-top: 1.25rem;
 }
 
@@ -653,6 +652,7 @@ body {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

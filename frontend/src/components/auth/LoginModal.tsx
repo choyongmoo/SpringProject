@@ -45,27 +45,27 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Sign In" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title="로그인" size="md">
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input
-          label="Username"
+          label="사용자명"
           name="username"
           type="text"
           value={formData.username}
           onChange={handleChange}
           required
           autoFocus
-          placeholder="Enter your username"
+          placeholder="사용자명을 입력하세요"
         />
 
         <Input
-          label="Password"
+          label="비밀번호"
           name="password"
           type="password"
           value={formData.password}
           onChange={handleChange}
           required
-          placeholder="Enter your password"
+          placeholder="비밀번호를 입력하세요"
         />
 
         {error && (
@@ -75,19 +75,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         )}
 
         <Button type="submit" className="w-full" loading={loading}>
-          Sign In
+          로그인
         </Button>
       </form>
 
       <div className="text-center mt-6 pt-4 border-t border-border-color">
         <p className="text-text-secondary text-sm">
-          Don't have an account?{" "}
+          계정이 없으신가요?{" "}
           <button
             type="button"
             onClick={handleSwitchToRegister}
             className="text-accent-primary hover:text-accent-secondary transition-colors font-medium"
           >
-            Sign up
+            회원가입
           </button>
         </p>
       </div>

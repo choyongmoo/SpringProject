@@ -15,10 +15,12 @@ export const Header: React.FC = () => {
   };
 
   const handleSwitchToRegister = () => {
+    setShowLoginModal(false);
     setShowRegisterModal(true);
   };
 
   const handleSwitchToLogin = () => {
+    setShowRegisterModal(false);
     setShowLoginModal(true);
   };
 
@@ -31,7 +33,7 @@ export const Header: React.FC = () => {
               to="/"
               className="text-xl font-bold text-text-primary hover:text-accent-primary transition-colors"
             >
-              Forum
+              Final Forum
             </Link>
 
             <nav className="flex items-center gap-6">
@@ -39,16 +41,16 @@ export const Header: React.FC = () => {
                 to="/"
                 className="text-text-secondary hover:text-text-primary transition-colors"
               >
-                Home
+                홈
               </Link>
 
               {isAuthenticated ? (
                 <div className="flex items-center gap-4">
                   <span className="text-text-secondary">
-                    Welcome, {user?.username}
+                    안녕하세요, {user?.username}님
                   </span>
                   <Button variant="secondary" size="sm" onClick={handleLogout}>
-                    Logout
+                    로그아웃
                   </Button>
                 </div>
               ) : (
@@ -58,14 +60,14 @@ export const Header: React.FC = () => {
                     size="sm"
                     onClick={() => setShowLoginModal(true)}
                   >
-                    Login
+                    로그인
                   </Button>
                   <Button
                     variant="primary"
                     size="sm"
                     onClick={() => setShowRegisterModal(true)}
                   >
-                    Register
+                    회원가입
                   </Button>
                 </div>
               )}
