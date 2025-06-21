@@ -25,15 +25,15 @@ public class PostService {
 
     public PostResponse getPost(Long id) {
         return new PostResponse(postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found")));
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다.")));
     }
 
     @Transactional
     public PostResponse updatePost(Long id, UpdatePostRequest request, User author) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
         if (!post.getAuthor().equals(author)) {
-            throw new RuntimeException("You are not the author of this post");
+            throw new RuntimeException("이 게시글의 작성자가 아닙니다.");
         }
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
@@ -43,16 +43,16 @@ public class PostService {
     @Transactional
     public void deletePost(Long id, User author) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
         if (!post.getAuthor().equals(author)) {
-            throw new RuntimeException("You are not the author of this post");
+            throw new RuntimeException("이 게시글의 작성자가 아닙니다.");
         }
         postRepository.deleteById(id);
     }
 
     public PostCommentsResponse getPostComments(Long id) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
         return new PostCommentsResponse(post, commentRepository.findByPostId(id));
     }
 
@@ -61,7 +61,7 @@ public class PostService {
         Comment comment = new Comment();
         comment.setContent(request.getContent());
         comment.setPost(postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found")));
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다.")));
         comment.setAuthor(author);
         return new CommentResponse(commentRepository.save(comment));
     }

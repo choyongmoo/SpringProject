@@ -35,13 +35,13 @@ public class CategoryService {
 
     public CategoryResponse getCategory(String name) {
         return new CategoryResponse(
-                categoryRepository.findById(name).orElseThrow(() -> new RuntimeException("Category not found")));
+                categoryRepository.findById(name).orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다.")));
     }
 
     @Transactional
     public CategoryResponse createCategory(CreateCategoryRequest request, User author) {
         if (categoryRepository.existsById(request.getName())) {
-            throw new RuntimeException("Category already exists");
+            throw new RuntimeException("이미 존재하는 카테고리입니다.");
         }
 
         Category category = new Category();
@@ -54,9 +54,9 @@ public class CategoryService {
     @Transactional
     public void deleteCategory(String name, User author) {
         Category category = categoryRepository.findById(name)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
         if (!category.getAuthor().equals(author)) {
-            throw new RuntimeException("You have no permission to delete this category");
+            throw new RuntimeException("이 카테고리를 삭제할 권한이 없습니다.");
         }
         categoryRepository.deleteById(name);
     }
@@ -64,9 +64,9 @@ public class CategoryService {
     @Transactional
     public CategoryResponse updateCategory(String name, UpdateCategoryRequest request, User author) {
         Category category = categoryRepository.findById(name)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
         if (!category.getAuthor().equals(author)) {
-            throw new RuntimeException("You have no permission to update this category");
+            throw new RuntimeException("이 카테고리를 수정할 권한이 없습니다.");
         }
         category.setName(request.getName());
         category.setDescription(request.getDescription());
@@ -75,7 +75,7 @@ public class CategoryService {
 
     public CategoryPostsResponse getCategoryPosts(String name) {
         Category category = categoryRepository.findById(name)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
         return new CategoryPostsResponse(category, postRepository.findByCategoryName(name));
     }
 
@@ -85,7 +85,7 @@ public class CategoryService {
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
         post.setCategory(
-                categoryRepository.findById(name).orElseThrow(() -> new RuntimeException("Category not found")));
+                categoryRepository.findById(name).orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다.")));
         post.setAuthor(author);
         return new PostResponse(postRepository.save(post));
     }

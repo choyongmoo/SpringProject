@@ -23,14 +23,14 @@ public class CommentService {
 
     public CommentResponse getComment(Long id) {
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
         return new CommentResponse(comment);
     }
 
     @Transactional
     public void createComment(Long postId, CreateCommentRequest request, User author) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
         Comment comment = new Comment();
         comment.setContent(request.getContent());
         comment.setPost(post);
@@ -42,9 +42,9 @@ public class CommentService {
     @Transactional
     public CommentResponse updateComment(Long id, UpdateCommentRequest request, User author) {
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
         if (!comment.getAuthor().equals(author)) {
-            throw new RuntimeException("You have no permission to update this comment");
+            throw new RuntimeException("이 댓글을 수정할 권한이 없습니다.");
         }
         comment.setContent(request.getContent());
 
@@ -54,9 +54,9 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long id, User author) {
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
         if (!comment.getAuthor().equals(author)) {
-            throw new RuntimeException("You have no permission to delete this comment");
+            throw new RuntimeException("이 댓글을 삭제할 권한이 없습니다.");
         }
         commentRepository.delete(comment);
     }
