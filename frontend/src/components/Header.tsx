@@ -44,19 +44,21 @@ export const Header: React.FC = () => {
                 홈
               </Link>
 
-              <Link
-                to="/h2-console"
+              <a
+                href="/h2-console"
+                target="_blank"
                 className="text-text-secondary hover:text-text-primary transition-colors"
               >
                 H2 콘솔
-              </Link>
+              </a>
 
-              <Link
-                to="/swagger-ui/index.html"
+              <a
+                href="/swagger-ui/index.html"
+                target="_blank"
                 className="text-text-secondary hover:text-text-primary transition-colors"
               >
                 Swagger
-              </Link>
+              </a>
 
               {isAuthenticated ? (
                 <div className="flex items-center gap-4">
